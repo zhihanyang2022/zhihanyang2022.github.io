@@ -239,7 +239,7 @@ $$
 
 
 
-which is reduced. A more involved analysis can be used to select $b$ that not only reduces but also minimizes the variance.
+which is reduced. A more involved analysis can be used to select $$b$$ that not only reduces but also minimizes the variance.
 
 ### Optimal baseline (minimize variance)
 
@@ -251,9 +251,9 @@ TODO
 
 ## Experimental results
 
-<img src='learning_curve.png'>
+<img src='https://raw.githubusercontent.com/zhihanyang2022/deeprl_notes_site/master/_posts/policy_gradient/learning_curve.png'>
 
-<img src='trajectory_under_learned_policy.png'>
+<img src='https://raw.githubusercontent.com/zhihanyang2022/deeprl_notes_site/master/_posts/policy_gradient/trajectory_under_learned_policy.png'>
 
 
 
