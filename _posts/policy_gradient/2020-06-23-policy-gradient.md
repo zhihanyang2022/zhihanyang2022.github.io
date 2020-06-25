@@ -39,16 +39,17 @@ where:
 Identity 1: $$\nabla_v f(v) = f(v) \frac{\nabla_v f(v)}{f(v)}=f(v) \nabla_v \log f(v)$$
 
 
+
 $$
 \begin{align*}
 \nabla_{\theta} J(\theta) 
 &= \nabla_\theta \left\{ \mathbb{E}_{\tau \sim \pi_\theta(\tau)} \left[ r(\tau) \right] \right\} \\
-&= \nabla_\theta \left\{ \int \pi_\theta(\tau) r(\tau) d\tau \right\} \tag*{Assume continuous environment}\\
+&= \nabla_\theta \left\{ \int \pi_\theta(\tau) r(\tau) d\tau \right\} \\
 &= \int \nabla_\theta \left\{ \pi_\theta(\tau) \right\} r(\tau) d\tau\\
-&= \int \pi_\theta(\tau) \nabla_\theta \left\{ \log\pi_\theta(\tau) \right\} r(\tau) d\tau \tag*{By identity 1} \\
+&= \int \pi_\theta(\tau) \nabla_\theta \left\{ \log\pi_\theta(\tau) \right\} r(\tau) d\tau \\
 &= \mathbb{E}_{\tau \sim \pi_{\theta}(\tau)} \left[ \nabla_\theta \left\{ \log \pi_\theta(\tau) \right\} r(\tau) \right] \\
-&= \mathbb{E}_{\tau \sim \pi_{\theta}(\tau)} \left[ \nabla_\theta \left\{ \log p(s_1) + \sum_{t=1}^{T-1} \log(\pi_\theta(a_t \mid s_t)) + \sum_{t=1}^{T-1} \log(p(s_{t+1} \mid s_t, a_t)) \right\} r(\tau) \right] \tag*{By definition of $\pi_\theta(\tau)$}\\
-&= \mathbb{E}_{\tau \sim \pi_{\theta}(\tau)} \left[ \nabla_\theta \left\{\sum_{t=1}^{T-1} \log(\pi_\theta(a_t \mid s_t))\right\} r(\tau) \right] \tag*{Cancelled irrelevant terms}\\
+&= \mathbb{E}_{\tau \sim \pi_{\theta}(\tau)} \left[ \nabla_\theta \left\{ \log p(s_1) + \sum_{t=1}^{T-1} \log(\pi_\theta(a_t \mid s_t)) + \sum_{t=1}^{T-1} \log(p(s_{t+1} \mid s_t, a_t)) \right\} r(\tau) \right] \\
+&= \mathbb{E}_{\tau \sim \pi_{\theta}(\tau)} \left[ \nabla_\theta \left\{\sum_{t=1}^{T-1} \log(\pi_\theta(a_t \mid s_t))\right\} r(\tau) \right] \\
 &= 
 \mathbb{E}_{\tau \sim \pi_{\theta}(\tau)} \left[ 
 \underbrace{
@@ -75,7 +76,7 @@ $$
 \begin{align*}
 &J_{\text{ML}}(\theta) \\
 =&\mathbb{E}_{\tau \sim p_{\text{train}}(\tau)}\left[\log \pi_{\theta} (\tau)\right] \\
-=&\mathbb{E}_{\tau \sim p_{\text{train}}(\tau)}\left[\sum_{t=1}^{T-1} \log \pi_{\theta} (a_t \mid s_t)\right] \tag*{Cancelled irrelevant terms} \\
+=&\mathbb{E}_{\tau \sim p_{\text{train}}(\tau)}\left[\sum_{t=1}^{T-1} \log \pi_{\theta} (a_t \mid s_t)\right] 
 \end{align*}
 $$
 
@@ -85,7 +86,7 @@ This is what we did last time in behavior cloning.
 
 Note that the expectation is over trajectories sampled from the training distribution, not the on-policy distribution.
 
-The easy-to-evaluate form of its gradient can be derived as follows. The important thing to note that is we no longer need to differentiate the distribution of $\tau$ w.r.t. $\theta$ anymore.
+The easy-to-evaluate form of its gradient can be derived as follows. The important thing to note that is we no longer need to differentiate the distribution of $$\tau$$ w.r.t. $$\theta$$ anymore.
 
 
 
@@ -107,9 +108,9 @@ The differences between behavior cloning and vanilla policy gradient are summari
 
 |        Method        |                       Policy gradient                        |            Maximum likelihood (behavior cloning)             |
 | :------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: |
-| Function to maximize | $$J(\theta)=\mathbb{E}_{\tau \sim \pi_\theta(\tau)} \left[ \sum_{t=1}^{T-1} r(s_t, a_t) \right]$$ | $$J_{\text{ML}}(\theta) = \mathbb{E}_{\tau \sim p_{\text{train}}(\tau)}\left[\sum_{t=1}^{T-1} \log \pi_{\theta} (a_t, s_t)\right]$$ |
-|       Gradient       | $$\nabla_{\theta} J(\theta) = \mathbb{E}_{\tau \sim \pi_{\theta}(\tau)} \left[ \underbrace{\left( \sum_{t=1}^{T-1} \nabla_\theta \left\{ \log(\pi_\theta(a_t \mid s_t)) \right\} \right) }_{\text{gradient in favor of } \tau}\underbrace{r(\tau)}_{\text{ reward of } \tau} \right]$$ | $$\nabla_{\theta}J_{\text{ML}}(\theta) = \mathbb{E}_{\tau \sim p_{\text{train}}(\tau)} \left[ \sum_{t=1}^{T-1} \nabla_{\theta}\log p_{\theta} (a_t, s_t) \right]$$ |
-| MC gradient estimate | $$\nabla_{\theta}J(\theta) \approx \frac{1}{N} \sum_{n=1}^N \left\{ \underbrace{\left( \sum_{t=1}^{T-1} \nabla_\theta \left\{ \log(\pi_\theta(a_{n, t} \mid s_{n, t})) \right\} \right) }_{\text{gradient in favor of } \tau_n}\underbrace{r(\tau_n)}_{\text{ reward of } \tau_n} \right\}$$ | $$\nabla_{\theta}J_{\text{ML}}(\theta) \approx \frac{1}{N} \sum_{n=1}^N \left\{ \underbrace{\sum_{t=1}^{T-1} \nabla_{\theta}\log p_{\theta} (a_{n, t} \mid s_{n, t})}_{\text{gradient in favor of } \tau_n} \right\}$$ |
+| Function to maximize | $$\mathbb{E}_{\tau \sim \pi_\theta(\tau)} \left[ \sum_{t=1}^{T-1} r(s_t, a_t) \right]$$ | $$\mathbb{E}_{\tau \sim p_{\text{train}}(\tau)}\left[\sum_{t=1}^{T-1} \log \pi_{\theta} (a_t, s_t)\right]$$ |
+|       Gradient       | $$\mathbb{E}_{\tau \sim \pi_{\theta}(\tau)} \left[ \underbrace{\left( \sum_{t=1}^{T-1} \nabla_\theta \left\{ \log(\pi_\theta(a_t \mid s_t)) \right\} \right) }_{\text{gradient in favor of } \tau}\underbrace{r(\tau)}_{\text{ reward of } \tau} \right]$$ | $$\mathbb{E}_{\tau \sim p_{\text{train}}(\tau)} \left[ \sum_{t=1}^{T-1} \nabla_{\theta}\log p_{\theta} (a_t, s_t) \right]$$ |
+| MC gradient estimate | $$\frac{1}{N} \sum_{n=1}^N \left\{ \underbrace{\left( \sum_{t=1}^{T-1} \nabla_\theta \left\{ \log(\pi_\theta(a_{n, t} \mid s_{n, t})) \right\} \right) }_{\text{gradient in favor of } \tau_n}\underbrace{r(\tau_n)}_{\text{ reward of } \tau_n} \right\}$$ | $$\frac{1}{N} \sum_{n=1}^N \left\{ \underbrace{\sum_{t=1}^{T-1} \nabla_{\theta}\log p_{\theta} (a_{n, t} \mid s_{n, t})}_{\text{gradient in favor of } \tau_n} \right\}$$ |
 
 Notes:
 
@@ -215,7 +216,7 @@ Each gradient term gets multiplied by a small scalar in the early phase of learn
 
 #### Analyze variance
 
-For some trajectory $\tau_n$, its contribution to the vanilla policy gradient $$\nabla_{\theta}J(\theta)$$ is $$\nabla_{\theta} \left\{ \log\pi_\theta(\tau_{n}) \right\} r(\tau_n)$$. Since $$\tau_n$$ is the outcome of a random process and $$\nabla_{\theta} \left\{ \log\pi_\theta(\tau_{n}) \right\} r(\tau_n)$$ depends on this outcome, $$\nabla_{\theta} \left\{ \log\pi_\theta(\tau_{n}) \right\} r(\tau_n)$$ is the product of two random variables. The variance of two independent variables $$X$$ and $$Y$$ is $$\mu_X^2 \sigma_Y^2 + \mu_Y^2 \sigma_X^2 + \sigma_X^2 \sigma_Y^2$$. Assuming that $$\nabla_{\theta} \left\{ \log\pi_\theta(\tau_{n}) \right\}$$ and $$ r(\tau_n)$$ are independent, the variance of their product can be written as
+For some trajectory $$\tau_n$$, its contribution to the vanilla policy gradient $$\nabla_{\theta}J(\theta)$$ is $$\nabla_{\theta} \left\{ \log\pi_\theta(\tau_{n}) \right\} r(\tau_n)$$. Since $$\tau_n$$ is the outcome of a random process and $$\nabla_{\theta} \left\{ \log\pi_\theta(\tau_{n}) \right\} r(\tau_n)$$ depends on this outcome, $$\nabla_{\theta} \left\{ \log\pi_\theta(\tau_{n}) \right\} r(\tau_n)$$ is the product of two random variables. The variance of two independent variables $$X$$ and $$Y$$ is $$\mu_X^2 \sigma_Y^2 + \mu_Y^2 \sigma_X^2 + \sigma_X^2 \sigma_Y^2$$. Assuming that $$\nabla_{\theta} \left\{ \log\pi_\theta(\tau_{n}) \right\}$$ and $$ r(\tau_n)$$ are independent, the variance of their product can be written as
 
 
 
