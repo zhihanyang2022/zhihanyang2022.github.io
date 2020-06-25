@@ -124,7 +124,7 @@ Notes:
     - Compute $$\nabla_{\theta}J(\theta)$$ by using its MC gradient estimate rule in the table above.
     - $$\theta_{\text{new}} \leftarrow \theta_{\text{old}} + \alpha \nabla_{\theta}J(\theta)$$. (A more advanced optimizer can be used in practice.)
 
-## Variants of vanilla REINFORCE
+## Variants of vanilla policy gradient
 
 Reference: answer by Jerry Liu: [Why does the policy gradient method have a high variance?](https://www.quora.com/Why-does-the-policy-gradient-method-have-a-high-variance)
 
@@ -251,7 +251,21 @@ TODO
 
 ## Experimental results
 
+### Cumulative reward over time
+
 <img src='https://raw.githubusercontent.com/zhihanyang2022/deeprl_notes_site/master/_posts/policy_gradient/learning_curve.png'>
+
+Legend:
+
+- rtg: reward-to-go
+- na: simple baseline (normalized advantages)
+
+Observations:
+
+- na seems to determine the rate of convergence initially (na $$\to$$ high rate of convergence initially).
+- rtg seems to determine whether a variant actually converges (rtg $$\to$$ convergence eventually reached).
+
+### Trajectory sampled under optimal policy
 
 <img src='https://raw.githubusercontent.com/zhihanyang2022/deeprl_notes_site/master/_posts/policy_gradient/trajectory_under_learned_policy.png'>
 
