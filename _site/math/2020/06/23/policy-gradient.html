@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.6.0 -->
+<title>Notes on Policy Gradient | Deep RL Notes</title>
+<meta name="generator" content="Jekyll v3.8.5" />
+<meta property="og:title" content="Notes on Policy Gradient" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Notes on deep reinforcement learning." />
+<meta property="og:description" content="Notes on deep reinforcement learning." />
+<link rel="canonical" href="http://localhost:4000/math/2020/06/23/policy-gradient.html" />
+<meta property="og:url" content="http://localhost:4000/math/2020/06/23/policy-gradient.html" />
+<meta property="og:site_name" content="Deep RL Notes" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-06-23T23:02:25-05:00" />
+<script type="application/ld+json">
+{"description":"Notes on deep reinforcement learning.","@type":"BlogPosting","url":"http://localhost:4000/math/2020/06/23/policy-gradient.html","headline":"Notes on Policy Gradient","dateModified":"2020-06-23T23:02:25-05:00","datePublished":"2020-06-23T23:02:25-05:00","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/math/2020/06/23/policy-gradient.html"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="Deep RL Notes" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">Deep RL Notes</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Notes on Policy Gradient</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2020-06-23T23:02:25-05:00" itemprop="datePublished">Jun 23, 2020
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+
+<ul id="markdown-toc">
+  <li><a href="#policy-gradient" id="markdown-toc-policy-gradient">Policy gradient</a></li>
+  <li><a href="#comparison-to-supervised-learning" id="markdown-toc-comparison-to-supervised-learning">Comparison to supervised learning</a></li>
+  <li><a href="#vanilla-reinforce" id="markdown-toc-vanilla-reinforce">Vanilla REINFORCE</a></li>
+  <li><a href="#variants-of-vanilla-reinforce" id="markdown-toc-variants-of-vanilla-reinforce">Variants of vanilla REINFORCE</a>    <ul>
+      <li><a href="#reward-to-go-exploiting-causality" id="markdown-toc-reward-to-go-exploiting-causality">Reward-to-go (exploiting causality)</a></li>
+      <li><a href="#baseline-normalizing-rewards" id="markdown-toc-baseline-normalizing-rewards">Baseline (normalizing rewards)</a></li>
+    </ul>
+  </li>
+</ul>
+
+<p>Note that we are dealing with finite episodes here.</p>
+
+<h2 id="policy-gradient">Policy gradient</h2>
+
+<p><strong>Goal.</strong> We seek to maximize the following quantity:
+<script type="math/tex">J(\theta) = \mathbb{E}_{\tau \sim \pi_\theta(\tau)} \left[ \sum_{t=1}^T r(s_t, a_t) \right]</script>
+where:</p>
+
+<ul>
+  <li><script type="math/tex">\theta</script> is the parameters of a neural network.</li>
+  <li><script type="math/tex">\tau = \left\{s_1, a_1, s_2, a_2, \cdots, s_{T-1}, a_{T-1}, s_T \right\}</script> is a trajectory of alternating states, actions and rewards.</li>
+  <li><script type="math/tex">\pi_{\theta}(\tau) = p(s_1) \prod_{t=1}^{T-1} \pi_\theta(a_t \mid s_t) p(s_{t+1} \mid s_t, a_t)</script> is the probability of <script type="math/tex">\tau</script> under <script type="math/tex">\pi_{\theta}</script>.</li>
+  <li><script type="math/tex">r</script> is the reward function (built-in to the environment).</li>
+</ul>
+
+<p><strong>Idea.</strong> <script type="math/tex">\theta_{\text{new}} = \theta_{\text{old}} + \nabla_{\theta} J(\theta)</script>, now we need to consider how to evaluate <script type="math/tex">\nabla_{\theta} J(\theta)</script>.</p>
+
+<p><strong>Derivation.</strong> Here we derive an easy-to-evaluate form of <script type="math/tex">\nabla_{\theta} J(\theta)</script>.</p>
+
+<ul>
+  <li>
+    <p>For the sake of unclustered notation, we use <script type="math/tex">r(\tau) = \sum_{t=1}^T r(s_t, a_t)</script>.</p>
+  </li>
+  <li>
+    <p>Handy identities</p>
+    <ul>
+      <li>Identity 1: <script type="math/tex">\nabla_v f(v) = f(v) \frac{\nabla_v f(v)}{f(v)}=f(v) \nabla_v \log(f(v))</script></li>
+    </ul>
+  </li>
+</ul>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{align*}
+\nabla_{\theta} J(\theta) 
+&= \nabla_\theta \left\{ \mathbb{E}_{\tau \sim \pi_\theta(\tau)} \left[ r(\tau) \right] \right\} \\
+&= \nabla_\theta \left\{ \int \pi_\theta(\tau) r(\tau) d\tau \right\} \\
+&= \int \nabla_\theta \left\{ \pi_\theta(\tau) \right\} r(\tau) d\tau\\
+&= \int \pi_\theta(\tau) \nabla_\theta \left\{ \log(\pi_\theta(\tau)) \right\} r(\tau) d\tau \tag*{By identity 1} \\
+&= \mathbb{E}_{\tau \sim \pi_{\theta}(\tau)} \left[ \nabla_\theta \left\{ \log(\pi_\theta(\tau)) \right\} r(\tau) \right] \\
+&= \mathbb{E}_{\tau \sim \pi_{\theta}(\tau)} \left[ \nabla_\theta \left\{ \log p(s_1) + \sum_{t=1}^{T-1} \log(\pi_\theta(a_t \mid s_t)) + \sum_{t=1}^{T-1} \log(p(s_{t+1} \mid s_t, a_t)) \right\} r(\tau) \right] \tag*{By definition of $\pi_\theta(\tau)$}\\
+&= \mathbb{E}_{\tau \sim \pi_{\theta}(\tau)} \left[ \nabla_\theta \left\{\sum_{t=1}^{T-1} \log(\pi_\theta(a_t \mid s_t))\right\} r(\tau) \right] \tag*{Cancelled irrelevant terms}\\
+&= 
+\mathbb{E}_{\tau \sim \pi_{\theta}(\tau)} \left[ 
+\underbrace{
+\left( \sum_{t=1}^{T-1} \nabla_\theta \left\{ \log(\pi_\theta(a_t \mid s_t)) \right\} \right) 
+}_{\text{gradient in favor of } \tau}
+\underbrace{r(\tau)}_{\text{ reward of } \tau} 
+\right] \\
+\end{align*} %]]></script>
+
+<p>In practice, this expectation can be evaluated simply by sampling trajectories.</p>
+
+<p>We can interpret the purpose of this gradient as increasing the probability of high reward trajectories and decreasing the probability of low reward trajectories.</p>
+
+<h2 id="comparison-to-supervised-learning">Comparison to supervised learning</h2>
+
+<p>We seek to maximize the following quantity using the maximum likelihood approach:</p>
+
+<script type="math/tex; mode=display">J_{\text{ML}}(\theta)=\mathbb{E}_{\tau \sim p_{\text{train}}(\tau)}\left[\sum_{t=1}^T \log \pi_{\theta} (a_t | s_t)\right]</script>
+
+<p>Note that the expectation is over trajectories sampled from the training distribution, not the on-policy distribution.</p>
+
+<p>The easy-to-evaluate form of its gradient can be derived as follows:</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{align*}
+\nabla_{\theta} \left\{ J_{\text{ML}}(\theta) \right\} &=\nabla_{\theta} \left\{ \mathbb{E}_{\tau \sim p_{\text{train}}(\tau)}\left[\sum_{t=1}^T \log p_{\theta} (a_t | s_t)\right]  \right\} \\
+&= \nabla_{\theta} \left\{ \int p_{\text{train}}(\tau) \left[\sum_{t=1}^T \log p_{\theta} (a_t | s_t)\right] d\tau \right\} \\
+&= \int  p_{\text{train}}(\tau) \nabla_{\theta} \left\{ \sum_{t=1}^T \log p_{\theta} (a_t | s_t)\right\} d\tau\\
+&= \int  p_{\text{train}}(\tau) \left\{ \sum_{t=1}^T  \nabla_{\theta}\log p_{\theta} (a_t | s_t)\right\} d\tau\\
+&= \mathbb{E}_{\tau \sim p_{\text{train}}(\tau)} \left[ 
+\underbrace{\sum_{t=1}^T  \nabla_{\theta}\log p_{\theta} (a_t | s_t)}_{\text{gradient in favor of }\tau} 
+\right]
+\end{align*} %]]></script>
+
+<p>The differences between behavior cloning and vanilla policy gradient are summarized below:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center">Method</th>
+      <th style="text-align: center">Policy gradient</th>
+      <th style="text-align: center">Maximum likelihood (behavior cloning)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center">Function to maximize</td>
+      <td style="text-align: center"><script type="math/tex">J(\theta)=\mathbb{E}_{\tau \sim \pi_\theta(\tau)} \left[ \sum_{t=1}^T r(s_t, a_t) \right]</script></td>
+      <td style="text-align: center"><script type="math/tex">J_{\text{ML}}(\theta) = \mathbb{E}_{\tau \sim p_{\text{train}}(\tau)}\left[\sum_{t=1}^T \log \pi_{\theta} (a_t, s_t)\right]</script></td>
+    </tr>
+    <tr>
+      <td style="text-align: center">Gradient</td>
+      <td style="text-align: center"><script type="math/tex">\nabla_{\theta} J(\theta) = \mathbb{E}_{\tau \sim \pi_{\theta}(\tau)} \left[ \underbrace{\left( \sum_{t=1}^{T-1} \nabla_\theta \left\{ \log(\pi_\theta(a_t \mid s_t)) \right\} \right) }_{\text{gradient in favor of } \tau}\underbrace{r(\tau)}_{\text{ reward of } \tau} \right]</script></td>
+      <td style="text-align: center"><script type="math/tex">\nabla_{\theta}J_{\text{ML}}(\theta) = \mathbb{E}_{\tau \sim p_{\text{train}}(\tau)} \left[ \sum_{t=1}^T \nabla_{\theta}\log p_{\theta} (a_t, s_t) \right]</script></td>
+    </tr>
+    <tr>
+      <td style="text-align: center">MC gradient estimate</td>
+      <td style="text-align: center"><script type="math/tex">\nabla_{\theta}J(\theta) \approx \frac{1}{N} \sum_{n=1}^N \left\{ \underbrace{\left( \sum_{t=1}^{T-1} \nabla_\theta \left\{ \log(\pi_\theta(a_{n, t} \mid s_{n, t})) \right\} \right) }_{\text{gradient in favor of } \tau_n}\underbrace{r(\tau_n)}_{\text{ reward of } \tau_n} \right\}</script></td>
+      <td style="text-align: center"><script type="math/tex">\nabla_{\theta}J_{\text{ML}}(\theta) \approx \frac{1}{N} \sum_{n=1}^N \left\{ \underbrace{\sum_{t=1}^T \nabla_{\theta}\log p_{\theta} (a_{n, t} \mid s_{n, t})}_{\text{gradient in favor of } \tau_n} \right\}</script></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Notes:</p>
+
+<ul>
+  <li>In English, <script type="math/tex">\nabla_{\theta} J(\theta)</script> weights the gradient in favor of <script type="math/tex">\tau_n</script> by its reward, while <script type="math/tex">\nabla_{\theta}J_{\text{ML}}(\theta)</script> weights all gradients equally.</li>
+  <li>The similarity between two gradients will help us compute the policy gradient, as we will see later.</li>
+</ul>
+
+<h2 id="vanilla-reinforce">Vanilla REINFORCE</h2>
+
+<ul>
+  <li>Initialize <script type="math/tex">\theta</script>.</li>
+  <li>Loop:
+    <ul>
+      <li>Sample set of <script type="math/tex">\tau_n</script> by running <script type="math/tex">\pi_{\theta}(a_t \mid s_t)</script> in some environment.</li>
+      <li>Compute <script type="math/tex">\nabla_{\theta}J(\theta)</script> by using its MC gradient estimate rule in the table above.</li>
+      <li><script type="math/tex">\theta_{\text{new}} \leftarrow \theta_{\text{old}} + \alpha \nabla_{\theta}J(\theta)</script>. (A more advanced optimizer can be used in practice.)</li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="variants-of-vanilla-reinforce">Variants of vanilla REINFORCE</h2>
+
+<p>Reference: answer by Jerry Liu: <a href="https://www.quora.com/Why-does-the-policy-gradient-method-have-a-high-variance">Why</a></p>
+
+<h3 id="reward-to-go-exploiting-causality">Reward-to-go (exploiting causality)</h3>
+
+<p>Since we will be estimating policy gradients by sampling trajectories, the variance of the resulting gradients can be high. To reduce this variance, we need to eliminate as many random variables as possible from the MC gradient estimate formula. To do so, we first re-write the MC gradient estimate formula as follows:</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{align*}
+\nabla_{\theta}J(\theta) 
+&\approx \frac{1}{N} \sum_{n=1}^N \left\{ \left( \sum_{t=1}^{T-1} \nabla_\theta \left\{ \log(\pi_\theta(a_{n, t} \mid s_{n, t})) \right\} \right) \left( \sum_{t=1}^{T-1} r(s_{n, t}, a_{n, t}) \right)\right\} \\
+&= \frac{1}{N} \sum_{n=1}^N \left\{ \left( \sum_{t=1}^{T-1} \nabla_\theta \left\{ \log(\pi_\theta(a_{n, t} \mid s_{n, t})) \right\} \left( \sum_{t'=1}^{T-1} r(s_{n, t'}, a_{n, t'}) \right)\right) \right\} \\
+&= \frac{1}{N} \sum_{n=1}^N \left\{ \left( \sum_{t=1}^{T-1} \nabla_\theta \left\{ \log(\pi_\theta(a_{n, t} \mid s_{n, t})) \right\} \left( \sum_{t'=t}^{T-1} r(s_{n, t'}, a_{n, t'}) \right)\right) \right\} \\
+\end{align*} %]]></script>
+
+<p>where we exploited causality (future actions do not impact past rewards) in the last step to remove all <script type="math/tex">r(s_{n, t’}, a_{n, t’})</script> where <script type="math/tex">% <![CDATA[
+t’ < t %]]></script>.</p>
+
+<p>To see why each reward is a random variable, consider the reward of the <script type="math/tex">k</script>-th state on the <script type="math/tex">i</script>-th sampled trajectory. Obviously, this reward, <script type="math/tex">r(s_{i, k}, a_{i, k})</script> can be a random variable depending on the outcomes of following random processes:</p>
+
+<ul>
+  <li>Randomness in reward (aka. the reward function itself maybe stochastic).</li>
+  <li>Randomness in what <script type="math/tex">s_{i, k}</script> is.</li>
+  <li>Randomness in what <script type="math/tex">a_{i, k}</script> is given <script type="math/tex">s_{i, k}</script>.</li>
+</ul>
+
+<h3 id="baseline-normalizing-rewards">Baseline (normalizing rewards)</h3>
+
+<p>To start off, we re-write the MC gradient estimate formula as follows:</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{align*}
+\nabla_{\theta}J(\theta) 
+&\approx \frac{1}{N} \sum_{n=1}^N \left\{ \left( \sum_{t=1}^{T-1} \nabla_\theta \left\{ \log(\pi_\theta(a_{n, t} \mid s_{n, t})) \right\} \right) r(\tau_n) \right\} \\
+&\approx \frac{1}{N} \sum_{n=1}^N \left\{ \nabla_{\theta} \left\{ \log \pi_{\theta} (\tau_n) \right\} r(\tau_n) \right\} \\
+\end{align*} %]]></script>
+
+<p>where <script type="math/tex">\nabla_{\theta}\left\{ \log \pi_{\theta} (\tau_n)\right\}</script> and <script type="math/tex">r(\tau_n)</script> are both random variables.</p>
+
+<p>For two uncorrelated random variables, the variance of their product can be re-written as:
+<script type="math/tex">\begin{align}
+\text{Var}(X, Y) 
+= (\sigma_{X}^2 + \mu_{X}^2)(\sigma_{Y}^2 + \mu_{Y}^2) - \mu_X^2\mu_Y^2
+\end{align}</script></p>
+
+<p>If <script type="math/tex">Y</script> is demeaned, we have
+<script type="math/tex">\text{Var}(X, Y) = (\sigma_{X}^2 + \mu_{X}^2)(0 + \mu_{Y}^2) - \mu_X^2\mu_Y^2</script></p>
+
+
+  </div><a class="u-url" href="/math/2020/06/23/policy-gradient.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Deep RL Notes</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Deep RL Notes</li><li><a class="u-email" href="mailto:yangz2@carleton.edu">yangz2@carleton.edu</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://www.twitter.com/jekyllrb"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg> <span class="username">jekyllrb</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>Notes on deep reinforcement learning.</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.5">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2020-06-24T11:06:34-05:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Deep RL Notes</title><subtitle>Notes on deep reinforcement learning.</subtitle><entry><title type="html">Notes on Policy Gradient</title><link href="http://localhost:4000/math/2020/06/23/policy-gradient.html" rel="alternate" type="text/html" title="Notes on Policy Gradient" /><published>2020-06-23T23:02:25-05:00</published><updated>2020-06-23T23:02:25-05:00</updated><id>http://localhost:4000/math/2020/06/23/policy-gradient</id><content type="html" xml:base="http://localhost:4000/math/2020/06/23/policy-gradient.html">&lt;script src=&quot;https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML&quot; type=&quot;text/javascript&quot;&gt;&lt;/script&gt;
+
+&lt;ul id=&quot;markdown-toc&quot;&gt;
+  &lt;li&gt;&lt;a href=&quot;#policy-gradient&quot; id=&quot;markdown-toc-policy-gradient&quot;&gt;Policy gradient&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;#comparison-to-supervised-learning&quot; id=&quot;markdown-toc-comparison-to-supervised-learning&quot;&gt;Comparison to supervised learning&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;#vanilla-reinforce&quot; id=&quot;markdown-toc-vanilla-reinforce&quot;&gt;Vanilla REINFORCE&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;#variants-of-vanilla-reinforce&quot; id=&quot;markdown-toc-variants-of-vanilla-reinforce&quot;&gt;Variants of vanilla REINFORCE&lt;/a&gt;    &lt;ul&gt;
+      &lt;li&gt;&lt;a href=&quot;#reward-to-go-exploiting-causality&quot; id=&quot;markdown-toc-reward-to-go-exploiting-causality&quot;&gt;Reward-to-go (exploiting causality)&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href=&quot;#baseline-normalizing-rewards&quot; id=&quot;markdown-toc-baseline-normalizing-rewards&quot;&gt;Baseline (normalizing rewards)&lt;/a&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Note that we are dealing with finite episodes here.&lt;/p&gt;
+
+&lt;h2 id=&quot;policy-gradient&quot;&gt;Policy gradient&lt;/h2&gt;
+
+&lt;p&gt;&lt;strong&gt;Goal.&lt;/strong&gt; We seek to maximize the following quantity:
+&lt;script type=&quot;math/tex&quot;&gt;J(\theta) = \mathbb{E}_{\tau \sim \pi_\theta(\tau)} \left[ \sum_{t=1}^T r(s_t, a_t) \right]&lt;/script&gt;
+where:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;script type=&quot;math/tex&quot;&gt;\theta&lt;/script&gt; is the parameters of a neural network.&lt;/li&gt;
+  &lt;li&gt;&lt;script type=&quot;math/tex&quot;&gt;\tau = \left\{s_1, a_1, s_2, a_2, \cdots, s_{T-1}, a_{T-1}, s_T \right\}&lt;/script&gt; is a trajectory of alternating states, actions and rewards.&lt;/li&gt;
+  &lt;li&gt;&lt;script type=&quot;math/tex&quot;&gt;\pi_{\theta}(\tau) = p(s_1) \prod_{t=1}^{T-1} \pi_\theta(a_t \mid s_t) p(s_{t+1} \mid s_t, a_t)&lt;/script&gt; is the probability of &lt;script type=&quot;math/tex&quot;&gt;\tau&lt;/script&gt; under &lt;script type=&quot;math/tex&quot;&gt;\pi_{\theta}&lt;/script&gt;.&lt;/li&gt;
+  &lt;li&gt;&lt;script type=&quot;math/tex&quot;&gt;r&lt;/script&gt; is the reward function (built-in to the environment).&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;strong&gt;Idea.&lt;/strong&gt; &lt;script type=&quot;math/tex&quot;&gt;\theta_{\text{new}} = \theta_{\text{old}} + \nabla_{\theta} J(\theta)&lt;/script&gt;, now we need to consider how to evaluate &lt;script type=&quot;math/tex&quot;&gt;\nabla_{\theta} J(\theta)&lt;/script&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Derivation.&lt;/strong&gt; Here we derive an easy-to-evaluate form of &lt;script type=&quot;math/tex&quot;&gt;\nabla_{\theta} J(\theta)&lt;/script&gt;.&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;For the sake of unclustered notation, we use &lt;script type=&quot;math/tex&quot;&gt;r(\tau) = \sum_{t=1}^T r(s_t, a_t)&lt;/script&gt;.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Handy identities&lt;/p&gt;
+    &lt;ul&gt;
+      &lt;li&gt;Identity 1: &lt;script type=&quot;math/tex&quot;&gt;\nabla_v f(v) = f(v) \frac{\nabla_v f(v)}{f(v)}=f(v) \nabla_v \log(f(v))&lt;/script&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\begin{align*}
+\nabla_{\theta} J(\theta) 
+&amp;= \nabla_\theta \left\{ \mathbb{E}_{\tau \sim \pi_\theta(\tau)} \left[ r(\tau) \right] \right\} \\
+&amp;= \nabla_\theta \left\{ \int \pi_\theta(\tau) r(\tau) d\tau \right\} \\
+&amp;= \int \nabla_\theta \left\{ \pi_\theta(\tau) \right\} r(\tau) d\tau\\
+&amp;= \int \pi_\theta(\tau) \nabla_\theta \left\{ \log(\pi_\theta(\tau)) \right\} r(\tau) d\tau \tag*{By identity 1} \\
+&amp;= \mathbb{E}_{\tau \sim \pi_{\theta}(\tau)} \left[ \nabla_\theta \left\{ \log(\pi_\theta(\tau)) \right\} r(\tau) \right] \\
+&amp;= \mathbb{E}_{\tau \sim \pi_{\theta}(\tau)} \left[ \nabla_\theta \left\{ \log p(s_1) + \sum_{t=1}^{T-1} \log(\pi_\theta(a_t \mid s_t)) + \sum_{t=1}^{T-1} \log(p(s_{t+1} \mid s_t, a_t)) \right\} r(\tau) \right] \tag*{By definition of $\pi_\theta(\tau)$}\\
+&amp;= \mathbb{E}_{\tau \sim \pi_{\theta}(\tau)} \left[ \nabla_\theta \left\{\sum_{t=1}^{T-1} \log(\pi_\theta(a_t \mid s_t))\right\} r(\tau) \right] \tag*{Cancelled irrelevant terms}\\
+&amp;= 
+\mathbb{E}_{\tau \sim \pi_{\theta}(\tau)} \left[ 
+\underbrace{
+\left( \sum_{t=1}^{T-1} \nabla_\theta \left\{ \log(\pi_\theta(a_t \mid s_t)) \right\} \right) 
+}_{\text{gradient in favor of } \tau}
+\underbrace{r(\tau)}_{\text{ reward of } \tau} 
+\right] \\
+\end{align*} %]]&gt;&lt;/script&gt;
+
+&lt;p&gt;In practice, this expectation can be evaluated simply by sampling trajectories.&lt;/p&gt;
+
+&lt;p&gt;We can interpret the purpose of this gradient as increasing the probability of high reward trajectories and decreasing the probability of low reward trajectories.&lt;/p&gt;
+
+&lt;h2 id=&quot;comparison-to-supervised-learning&quot;&gt;Comparison to supervised learning&lt;/h2&gt;
+
+&lt;p&gt;We seek to maximize the following quantity using the maximum likelihood approach:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;J_{\text{ML}}(\theta)=\mathbb{E}_{\tau \sim p_{\text{train}}(\tau)}\left[\sum_{t=1}^T \log \pi_{\theta} (a_t | s_t)\right]&lt;/script&gt;
+
+&lt;p&gt;Note that the expectation is over trajectories sampled from the training distribution, not the on-policy distribution.&lt;/p&gt;
+
+&lt;p&gt;The easy-to-evaluate form of its gradient can be derived as follows:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\begin{align*}
+\nabla_{\theta} \left\{ J_{\text{ML}}(\theta) \right\} &amp;=\nabla_{\theta} \left\{ \mathbb{E}_{\tau \sim p_{\text{train}}(\tau)}\left[\sum_{t=1}^T \log p_{\theta} (a_t | s_t)\right]  \right\} \\
+&amp;= \nabla_{\theta} \left\{ \int p_{\text{train}}(\tau) \left[\sum_{t=1}^T \log p_{\theta} (a_t | s_t)\right] d\tau \right\} \\
+&amp;= \int  p_{\text{train}}(\tau) \nabla_{\theta} \left\{ \sum_{t=1}^T \log p_{\theta} (a_t | s_t)\right\} d\tau\\
+&amp;= \int  p_{\text{train}}(\tau) \left\{ \sum_{t=1}^T  \nabla_{\theta}\log p_{\theta} (a_t | s_t)\right\} d\tau\\
+&amp;= \mathbb{E}_{\tau \sim p_{\text{train}}(\tau)} \left[ 
+\underbrace{\sum_{t=1}^T  \nabla_{\theta}\log p_{\theta} (a_t | s_t)}_{\text{gradient in favor of }\tau} 
+\right]
+\end{align*} %]]&gt;&lt;/script&gt;
+
+&lt;p&gt;The differences between behavior cloning and vanilla policy gradient are summarized below:&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th style=&quot;text-align: center&quot;&gt;Method&lt;/th&gt;
+      &lt;th style=&quot;text-align: center&quot;&gt;Policy gradient&lt;/th&gt;
+      &lt;th style=&quot;text-align: center&quot;&gt;Maximum likelihood (behavior cloning)&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;Function to maximize&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;&lt;script type=&quot;math/tex&quot;&gt;J(\theta)=\mathbb{E}_{\tau \sim \pi_\theta(\tau)} \left[ \sum_{t=1}^T r(s_t, a_t) \right]&lt;/script&gt;&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;&lt;script type=&quot;math/tex&quot;&gt;J_{\text{ML}}(\theta) = \mathbb{E}_{\tau \sim p_{\text{train}}(\tau)}\left[\sum_{t=1}^T \log \pi_{\theta} (a_t, s_t)\right]&lt;/script&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;Gradient&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;&lt;script type=&quot;math/tex&quot;&gt;\nabla_{\theta} J(\theta) = \mathbb{E}_{\tau \sim \pi_{\theta}(\tau)} \left[ \underbrace{\left( \sum_{t=1}^{T-1} \nabla_\theta \left\{ \log(\pi_\theta(a_t \mid s_t)) \right\} \right) }_{\text{gradient in favor of } \tau}\underbrace{r(\tau)}_{\text{ reward of } \tau} \right]&lt;/script&gt;&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;&lt;script type=&quot;math/tex&quot;&gt;\nabla_{\theta}J_{\text{ML}}(\theta) = \mathbb{E}_{\tau \sim p_{\text{train}}(\tau)} \left[ \sum_{t=1}^T \nabla_{\theta}\log p_{\theta} (a_t, s_t) \right]&lt;/script&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;MC gradient estimate&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;&lt;script type=&quot;math/tex&quot;&gt;\nabla_{\theta}J(\theta) \approx \frac{1}{N} \sum_{n=1}^N \left\{ \underbrace{\left( \sum_{t=1}^{T-1} \nabla_\theta \left\{ \log(\pi_\theta(a_{n, t} \mid s_{n, t})) \right\} \right) }_{\text{gradient in favor of } \tau_n}\underbrace{r(\tau_n)}_{\text{ reward of } \tau_n} \right\}&lt;/script&gt;&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;&lt;script type=&quot;math/tex&quot;&gt;\nabla_{\theta}J_{\text{ML}}(\theta) \approx \frac{1}{N} \sum_{n=1}^N \left\{ \underbrace{\sum_{t=1}^T \nabla_{\theta}\log p_{\theta} (a_{n, t} \mid s_{n, t})}_{\text{gradient in favor of } \tau_n} \right\}&lt;/script&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;Notes:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;In English, &lt;script type=&quot;math/tex&quot;&gt;\nabla_{\theta} J(\theta)&lt;/script&gt; weights the gradient in favor of &lt;script type=&quot;math/tex&quot;&gt;\tau_n&lt;/script&gt; by its reward, while &lt;script type=&quot;math/tex&quot;&gt;\nabla_{\theta}J_{\text{ML}}(\theta)&lt;/script&gt; weights all gradients equally.&lt;/li&gt;
+  &lt;li&gt;The similarity between two gradients will help us compute the policy gradient, as we will see later.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;vanilla-reinforce&quot;&gt;Vanilla REINFORCE&lt;/h2&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Initialize &lt;script type=&quot;math/tex&quot;&gt;\theta&lt;/script&gt;.&lt;/li&gt;
+  &lt;li&gt;Loop:
+    &lt;ul&gt;
+      &lt;li&gt;Sample set of &lt;script type=&quot;math/tex&quot;&gt;\tau_n&lt;/script&gt; by running &lt;script type=&quot;math/tex&quot;&gt;\pi_{\theta}(a_t \mid s_t)&lt;/script&gt; in some environment.&lt;/li&gt;
+      &lt;li&gt;Compute &lt;script type=&quot;math/tex&quot;&gt;\nabla_{\theta}J(\theta)&lt;/script&gt; by using its MC gradient estimate rule in the table above.&lt;/li&gt;
+      &lt;li&gt;&lt;script type=&quot;math/tex&quot;&gt;\theta_{\text{new}} \leftarrow \theta_{\text{old}} + \alpha \nabla_{\theta}J(\theta)&lt;/script&gt;. (A more advanced optimizer can be used in practice.)&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;variants-of-vanilla-reinforce&quot;&gt;Variants of vanilla REINFORCE&lt;/h2&gt;
+
+&lt;p&gt;Reference: answer by Jerry Liu: &lt;a href=&quot;https://www.quora.com/Why-does-the-policy-gradient-method-have-a-high-variance&quot;&gt;Why&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;reward-to-go-exploiting-causality&quot;&gt;Reward-to-go (exploiting causality)&lt;/h3&gt;
+
+&lt;p&gt;Since we will be estimating policy gradients by sampling trajectories, the variance of the resulting gradients can be high. To reduce this variance, we need to eliminate as many random variables as possible from the MC gradient estimate formula. To do so, we first re-write the MC gradient estimate formula as follows:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\begin{align*}
+\nabla_{\theta}J(\theta) 
+&amp;\approx \frac{1}{N} \sum_{n=1}^N \left\{ \left( \sum_{t=1}^{T-1} \nabla_\theta \left\{ \log(\pi_\theta(a_{n, t} \mid s_{n, t})) \right\} \right) \left( \sum_{t=1}^{T-1} r(s_{n, t}, a_{n, t}) \right)\right\} \\
+&amp;= \frac{1}{N} \sum_{n=1}^N \left\{ \left( \sum_{t=1}^{T-1} \nabla_\theta \left\{ \log(\pi_\theta(a_{n, t} \mid s_{n, t})) \right\} \left( \sum_{t'=1}^{T-1} r(s_{n, t'}, a_{n, t'}) \right)\right) \right\} \\
+&amp;= \frac{1}{N} \sum_{n=1}^N \left\{ \left( \sum_{t=1}^{T-1} \nabla_\theta \left\{ \log(\pi_\theta(a_{n, t} \mid s_{n, t})) \right\} \left( \sum_{t'=t}^{T-1} r(s_{n, t'}, a_{n, t'}) \right)\right) \right\} \\
+\end{align*} %]]&gt;&lt;/script&gt;
+
+&lt;p&gt;where we exploited causality (future actions do not impact past rewards) in the last step to remove all &lt;script type=&quot;math/tex&quot;&gt;r(s_{n, t’}, a_{n, t’})&lt;/script&gt; where &lt;script type=&quot;math/tex&quot;&gt;% &lt;![CDATA[
+t’ &lt; t %]]&gt;&lt;/script&gt;.&lt;/p&gt;
+
+&lt;p&gt;To see why each reward is a random variable, consider the reward of the &lt;script type=&quot;math/tex&quot;&gt;k&lt;/script&gt;-th state on the &lt;script type=&quot;math/tex&quot;&gt;i&lt;/script&gt;-th sampled trajectory. Obviously, this reward, &lt;script type=&quot;math/tex&quot;&gt;r(s_{i, k}, a_{i, k})&lt;/script&gt; can be a random variable depending on the outcomes of following random processes:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Randomness in reward (aka. the reward function itself maybe stochastic).&lt;/li&gt;
+  &lt;li&gt;Randomness in what &lt;script type=&quot;math/tex&quot;&gt;s_{i, k}&lt;/script&gt; is.&lt;/li&gt;
+  &lt;li&gt;Randomness in what &lt;script type=&quot;math/tex&quot;&gt;a_{i, k}&lt;/script&gt; is given &lt;script type=&quot;math/tex&quot;&gt;s_{i, k}&lt;/script&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;baseline-normalizing-rewards&quot;&gt;Baseline (normalizing rewards)&lt;/h3&gt;
+
+&lt;p&gt;To start off, we re-write the MC gradient estimate formula as follows:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\begin{align*}
+\nabla_{\theta}J(\theta) 
+&amp;\approx \frac{1}{N} \sum_{n=1}^N \left\{ \left( \sum_{t=1}^{T-1} \nabla_\theta \left\{ \log(\pi_\theta(a_{n, t} \mid s_{n, t})) \right\} \right) r(\tau_n) \right\} \\
+&amp;\approx \frac{1}{N} \sum_{n=1}^N \left\{ \nabla_{\theta} \left\{ \log \pi_{\theta} (\tau_n) \right\} r(\tau_n) \right\} \\
+\end{align*} %]]&gt;&lt;/script&gt;
+
+&lt;p&gt;where &lt;script type=&quot;math/tex&quot;&gt;\nabla_{\theta}\left\{ \log \pi_{\theta} (\tau_n)\right\}&lt;/script&gt; and &lt;script type=&quot;math/tex&quot;&gt;r(\tau_n)&lt;/script&gt; are both random variables.&lt;/p&gt;
+
+&lt;p&gt;For two uncorrelated random variables, the variance of their product can be re-written as:
+&lt;script type=&quot;math/tex&quot;&gt;\begin{align}
+\text{Var}(X, Y) 
+= (\sigma_{X}^2 + \mu_{X}^2)(\sigma_{Y}^2 + \mu_{Y}^2) - \mu_X^2\mu_Y^2
+\end{align}&lt;/script&gt;&lt;/p&gt;
+
+&lt;p&gt;If &lt;script type=&quot;math/tex&quot;&gt;Y&lt;/script&gt; is demeaned, we have
+&lt;script type=&quot;math/tex&quot;&gt;\text{Var}(X, Y) = (\sigma_{X}^2 + \mu_{X}^2)(0 + \mu_{Y}^2) - \mu_X^2\mu_Y^2&lt;/script&gt;&lt;/p&gt;</content><author><name></name></author><summary type="html"></summary></entry><entry><title type="html">Welcome to Jekyll!</title><link href="http://localhost:4000/jekyll/update/2020/06/23/welcome-to-jekyll.html" rel="alternate" type="text/html" title="Welcome to Jekyll!" /><published>2020-06-23T23:02:25-05:00</published><updated>2020-06-23T23:02:25-05:00</updated><id>http://localhost:4000/jekyll/update/2020/06/23/welcome-to-jekyll</id><content type="html" xml:base="http://localhost:4000/jekyll/update/2020/06/23/welcome-to-jekyll.html">&lt;p&gt;You’ll find this post in your &lt;code class=&quot;highlighter-rouge&quot;&gt;_posts&lt;/code&gt; directory. Go ahead and edit it and re-build the site to see your changes. You can rebuild the site in many different ways, but the most common way is to run &lt;code class=&quot;highlighter-rouge&quot;&gt;jekyll serve&lt;/code&gt;, which launches a web server and auto-regenerates your site when a file is updated.&lt;/p&gt;
+
+&lt;p&gt;To add new posts, simply add a file in the &lt;code class=&quot;highlighter-rouge&quot;&gt;_posts&lt;/code&gt; directory that follows the convention &lt;code class=&quot;highlighter-rouge&quot;&gt;YYYY-MM-DD-name-of-post.ext&lt;/code&gt; and includes the necessary front matter. Take a look at the source for this post to get an idea about how it works.&lt;/p&gt;
+
+&lt;p&gt;Jekyll also offers powerful support for code snippets:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;print_hi&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+  &lt;span class=&quot;nb&quot;&gt;puts&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;Hi, &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;print_hi&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'Tom'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;#=&amp;gt; prints 'Hi, Tom' to STDOUT.&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Check out the &lt;a href=&quot;https://jekyllrb.com/docs/home&quot;&gt;Jekyll docs&lt;/a&gt; for more info on how to get the most out of Jekyll. File all bugs/feature requests at &lt;a href=&quot;https://github.com/jekyll/jekyll&quot;&gt;Jekyll’s GitHub repo&lt;/a&gt;. If you have questions, you can ask them on &lt;a href=&quot;https://talk.jekyllrb.com/&quot;&gt;Jekyll Talk&lt;/a&gt;.&lt;/p&gt;</content><author><name></name></author><summary type="html">You’ll find this post in your _posts directory. Go ahead and edit it and re-build the site to see your changes. You can rebuild the site in many different ways, but the most common way is to run jekyll serve, which launches a web server and auto-regenerates your site when a file is updated.</summary></entry></feed>
