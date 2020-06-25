@@ -62,7 +62,7 @@ $$
 
 
 
-In practice, this expectation can be evaluated by sampling trajectories using $\pi_{\theta}$ (does not need to be optimal).
+In practice, this expectation can be evaluated by sampling trajectories using $$\pi_{\theta}$$ (does not need to be optimal).
 
 We can interpret the purpose of this gradient as increasing the probability of high reward trajectories and decreasing the probability of low reward trajectories.
 
