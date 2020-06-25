@@ -75,7 +75,7 @@ $$
 \begin{align*}
 &J_{\text{ML}}(\theta) \\
 =&\mathbb{E}_{\tau \sim p_{\text{train}}(\tau)}\left[\log \pi_{\theta} (\tau)\right] \\
-=&\mathbb{E}_{\tau \sim p_{\text{train}}(\tau)}\left[\sum_{t=1}^T \log \pi_{\theta} (a_t \mid s_t)\right] \tag*{Cancelled irrelevant terms} \\
+=&\mathbb{E}_{\tau \sim p_{\text{train}}(\tau)}\left[\sum_{t=1}^{T-1} \log \pi_{\theta} (a_t \mid s_t)\right] \tag*{Cancelled irrelevant terms} \\
 \end{align*}
 $$
 
@@ -91,12 +91,12 @@ The easy-to-evaluate form of its gradient can be derived as follows. The importa
 
 $$
 \begin{align*}
-\nabla_{\theta} \left\{ J_{\text{ML}}(\theta) \right\} &=\nabla_{\theta} \left\{ \mathbb{E}_{\tau \sim p_{\text{train}}(\tau)}\left[\sum_{t=1}^T \log p_{\theta} (a_t | s_t)\right]  \right\} \\
-&= \nabla_{\theta} \left\{ \int p_{\text{train}}(\tau) \left[\sum_{t=1}^T \log p_{\theta} (a_t | s_t)\right] d\tau \right\} \\
-&= \int  p_{\text{train}}(\tau) \nabla_{\theta} \left\{ \sum_{t=1}^T \log p_{\theta} (a_t | s_t)\right\} d\tau\\
-&= \int  p_{\text{train}}(\tau) \left\{ \sum_{t=1}^T  \nabla_{\theta}\log p_{\theta} (a_t | s_t)\right\} d\tau\\
+\nabla_{\theta} \left\{ J_{\text{ML}}(\theta) \right\} &=\nabla_{\theta} \left\{ \mathbb{E}_{\tau \sim p_{\text{train}}(\tau)}\left[\sum_{t=1}^{T-1} \log p_{\theta} (a_t \mid s_t)\right]  \right\} \\
+&= \nabla_{\theta} \left\{ \int p_{\text{train}}(\tau) \left[\sum_{t=1}^{T-1} \log p_{\theta} (a_t \mid s_t)\right] d\tau \right\} \\
+&= \int  p_{\text{train}}(\tau) \nabla_{\theta} \left\{ \sum_{t=1}^{T-1} \log p_{\theta} (a_t \mid s_t)\right\} d\tau\\
+&= \int  p_{\text{train}}(\tau) \left\{ \sum_{t=1}^{T-1}  \nabla_{\theta}\log p_{\theta} (a_t \mid s_t)\right\} d\tau\\
 &= \mathbb{E}_{\tau \sim p_{\text{train}}(\tau)} \left[ 
-\underbrace{\sum_{t=1}^T  \nabla_{\theta}\log p_{\theta} (a_t | s_t)}_{\text{gradient in favor of }\tau} 
+\underbrace{\sum_{t=1}^{T-1}  \nabla_{\theta}\log p_{\theta} (a_t \mid s_t)}_{\text{gradient in favor of }\tau} 
 \right]
 \end{align*}
 $$
@@ -107,9 +107,9 @@ The differences between behavior cloning and vanilla policy gradient are summari
 
 |        Method        |                       Policy gradient                        |            Maximum likelihood (behavior cloning)             |
 | :------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: |
-| Function to maximize | $$J(\theta)=\mathbb{E}_{\tau \sim \pi_\theta(\tau)} \left[ \sum_{t=1}^T r(s_t, a_t) \right]$$ | $$J_{\text{ML}}(\theta) = \mathbb{E}_{\tau \sim p_{\text{train}}(\tau)}\left[\sum_{t=1}^T \log \pi_{\theta} (a_t, s_t)\right]$$ |
-|       Gradient       | $$\nabla_{\theta} J(\theta) = \mathbb{E}_{\tau \sim \pi_{\theta}(\tau)} \left[ \underbrace{\left( \sum_{t=1}^{T-1} \nabla_\theta \left\{ \log(\pi_\theta(a_t \mid s_t)) \right\} \right) }_{\text{gradient in favor of } \tau}\underbrace{r(\tau)}_{\text{ reward of } \tau} \right]$$ | $$\nabla_{\theta}J_{\text{ML}}(\theta) = \mathbb{E}_{\tau \sim p_{\text{train}}(\tau)} \left[ \sum_{t=1}^T \nabla_{\theta}\log p_{\theta} (a_t, s_t) \right]$$ |
-| MC gradient estimate | $$\nabla_{\theta}J(\theta) \approx \frac{1}{N} \sum_{n=1}^N \left\{ \underbrace{\left( \sum_{t=1}^{T-1} \nabla_\theta \left\{ \log(\pi_\theta(a_{n, t} \mid s_{n, t})) \right\} \right) }_{\text{gradient in favor of } \tau_n}\underbrace{r(\tau_n)}_{\text{ reward of } \tau_n} \right\}$$ | $$\nabla_{\theta}J_{\text{ML}}(\theta) \approx \frac{1}{N} \sum_{n=1}^N \left\{ \underbrace{\sum_{t=1}^T \nabla_{\theta}\log p_{\theta} (a_{n, t} \mid s_{n, t})}_{\text{gradient in favor of } \tau_n} \right\}$$ |
+| Function to maximize | $$J(\theta)=\mathbb{E}_{\tau \sim \pi_\theta(\tau)} \left[ \sum_{t=1}^{T-1} r(s_t, a_t) \right]$$ | $$J_{\text{ML}}(\theta) = \mathbb{E}_{\tau \sim p_{\text{train}}(\tau)}\left[\sum_{t=1}^{T-1} \log \pi_{\theta} (a_t, s_t)\right]$$ |
+|       Gradient       | $$\nabla_{\theta} J(\theta) = \mathbb{E}_{\tau \sim \pi_{\theta}(\tau)} \left[ \underbrace{\left( \sum_{t=1}^{T-1} \nabla_\theta \left\{ \log(\pi_\theta(a_t \mid s_t)) \right\} \right) }_{\text{gradient in favor of } \tau}\underbrace{r(\tau)}_{\text{ reward of } \tau} \right]$$ | $$\nabla_{\theta}J_{\text{ML}}(\theta) = \mathbb{E}_{\tau \sim p_{\text{train}}(\tau)} \left[ \sum_{t=1}^{T-1} \nabla_{\theta}\log p_{\theta} (a_t, s_t) \right]$$ |
+| MC gradient estimate | $$\nabla_{\theta}J(\theta) \approx \frac{1}{N} \sum_{n=1}^N \left\{ \underbrace{\left( \sum_{t=1}^{T-1} \nabla_\theta \left\{ \log(\pi_\theta(a_{n, t} \mid s_{n, t})) \right\} \right) }_{\text{gradient in favor of } \tau_n}\underbrace{r(\tau_n)}_{\text{ reward of } \tau_n} \right\}$$ | $$\nabla_{\theta}J_{\text{ML}}(\theta) \approx \frac{1}{N} \sum_{n=1}^N \left\{ \underbrace{\sum_{t=1}^{T-1} \nabla_{\theta}\log p_{\theta} (a_{n, t} \mid s_{n, t})}_{\text{gradient in favor of } \tau_n} \right\}$$ |
 
 Notes:
 
@@ -257,8 +257,14 @@ TODO
 
 Legend:
 
+- cartpole_v0: [CartPole-v0 (link to OpenAI's gym page)](https://gym.openai.com/envs/CartPole-v0/)
+- pg: solved using policy gradient
+- 50: trained for 50 iterations
+- 100: for each iteration, 100 trajectories are sampled
 - rtg: reward-to-go
 - na: simple baseline (normalized advantages)
+- solid lines: median performance
+- shaped regions: 0.25 to 0.75 quantile performance
 
 Observations:
 
