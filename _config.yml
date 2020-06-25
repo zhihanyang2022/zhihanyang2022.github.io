@@ -13,11 +13,11 @@
 # you will see them accessed via {{ site.title }}, {{ site.email }}, and so on.
 # You can create any custom variable you would like, and they will be accessible
 # in the templates via {{ site.myvariable }}.
-title: Deep RL Notes
+title: Zhihan's Deep RL Notes
 email: yangz2@carleton.edu
 description: >- # this means to ignore newlines until "baseurl:"
-  Notes on deep reinforcement learning.
-baseurl: "docs" # the subpath of your site, e.g. /blog
+  Zhihan's notes on deep reinforcement learning. For Pytorch implementations, check out https://github.com/zhihanyang2022/deeprl_notes.
+baseurl: "deeprl_notes_site" # the subpath of your site, e.g. /blog
 url: "" # the base hostname & protocol for your site, e.g. http://example.com
 twitter_username: jekyllrb
 
