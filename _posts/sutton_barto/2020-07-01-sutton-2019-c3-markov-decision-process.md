@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Sutton & Barto C3 - Markov Decision Process"
+title:  “Sutton 2019 C3 Markov Decision Process"
 date:   2020-07-01 18:00:00 -0500
 categories: math
 ---
