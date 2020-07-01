@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  “Notes on Markov Decision Process"
+title:  “Notes on Finite Markov Decision Processes"
 date:   2020-07-01 18:00:00 -0500
 categories: math
 ---
@@ -30,11 +30,13 @@ categories: math
 There are three equivalent expressions:
 
 
+
 $$
 \begin{align*}
 G_t &= R_{t+1} + \gamma R_{t+2} + \gamma^2 R_{t+3} + \cdots = \sum_{k=0}^{\infty} \gamma^{k}R_{t+k+1} = R_{t+1} + \gamma G_{t+1}
 \end{align*}
 $$
+
 
 
 If the reward received at each time-step is just one, then $$G_t = \sum_{k=0}^{\infty}\gamma^k = \frac{1}{1 - \gamma}$$.
@@ -72,6 +74,7 @@ $$
 Express $$v_{\pi}(s)$$ in terms of $$q_{\pi}(s, a)$$:
 
 
+
 $$
 \begin{align*}
 v_{\pi}(s) &= \mathbb{E}_{a \sim \pi(s)} \left[ q_{\pi}(s, a) \right] \\
@@ -80,7 +83,9 @@ v_{\pi}(s) &= \mathbb{E}_{a \sim \pi(s)} \left[ q_{\pi}(s, a) \right] \\
 $$
 
 
+
 Express $$v_{\ast}(s)$$ in terms of $$q_{\ast}(s, a)$$:
+
 
 
 $$
@@ -94,6 +99,7 @@ $$
 Express $$q_{\pi}(s, a)$$ in terms of $$v_{\pi}(s)$$:
 
 
+
 $$
 \begin{align*}
 q_{\pi}(s, a) &= \mathbb{E}_{(s', r) \sim p(s', r|s, a)} \left[ r + \gamma v_{\pi}(s')\right] \\
@@ -102,7 +108,9 @@ q_{\pi}(s, a) &= \mathbb{E}_{(s', r) \sim p(s', r|s, a)} \left[ r + \gamma v_{\p
 $$
 
 
+
 Express $$q_{\ast}(s, a)$$ in terms of $$v_{\ast}(s)$$:
+
 
 
 $$
@@ -129,7 +137,10 @@ v_{\pi}(s) &= \mathbb{E}_{a \sim \pi(s)} \left[ q_{\pi}(s, a) \right] \\
 \end{align*}
 $$
 
+
+
 Express  $$v_{\ast}(s)$$ in terms of  $$v_{\ast}(s)$$:
+
 
 
 $$
@@ -145,6 +156,7 @@ $$
 Express $$q_{\pi}(s, a)$$ in terms of $$q_{\pi}(s, a)$$:
 
 
+
 $$
 \begin{align*}
 q_{\pi}(s, a) &= \mathbb{E}_{(s', r) \sim p(s', r|s, a)} \left[ r + \gamma v_{\pi}(s')\right] \\
@@ -153,7 +165,10 @@ q_{\pi}(s, a) &= \mathbb{E}_{(s', r) \sim p(s', r|s, a)} \left[ r + \gamma v_{\p
 \end{align*}
 $$
 
+
+
 Express $$q_{\ast}(s, a)$$ in terms of $$q_{\ast}(s, a)$$:
+
 
 $$
 \begin{align*}
