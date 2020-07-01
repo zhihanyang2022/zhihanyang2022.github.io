@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  “Sutton 2019 C3 Markov Decision Process"
+title:  Sutton 2019 C3 Markov Decision Process
 date:   2020-07-01 18:00:00 -0500
 categories: math
 ---
@@ -118,7 +118,7 @@ By nesting the two identities above, we can easily demonstrate the following two
 
 ---
 
-Express $v_{\pi}(s)$ in terms of $v_{\pi}(s)$:
+Express $$v_{\pi}(s)$$ in terms of $$v_{\pi}(s)$$:
 
 
 $$
@@ -152,9 +152,7 @@ q_{\pi}(s, a) &= \mathbb{E}_{(s', r) \sim p(s', r|s, a)} \left[ r + \gamma v_{\p
 \end{align*}
 $$
 
-
 Express $$q_{\ast}(s, a)$$ in terms of $$q_{\ast}(s, a)$$:
-
 
 $$
 \begin{align*}
