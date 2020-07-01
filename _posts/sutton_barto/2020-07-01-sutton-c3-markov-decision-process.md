@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  Sutton 2019 C3 Markov Decision Process
+title:  “Notes on Markov Decision Process"
 date:   2020-07-01 18:00:00 -0500
 categories: math
 ---
@@ -129,8 +129,9 @@ v_{\pi}(s) &= \mathbb{E}_{a \sim \pi(s)} \left[ q_{\pi}(s, a) \right] \\
 \end{align*}
 $$
 
-
 Express  $$v_{\ast}(s)$$ in terms of  $$v_{\ast}(s)$$:
+
+
 $$
 \begin{align*}
 v_{\ast}(s) &= \max_{a \in \mathcal{A}} q_{\ast}(s, a) \\
