@@ -1,7 +1,7 @@
 ---
 layout: post
-title:  “Notes on Finite Markov Decision Processes"
-date:   2020-07-01 18:00:00 -0500
+title:  "Finite Markov Decision Processes"
+date:   2020-06-23 23:02:25 -0500
 categories: math
 ---
 
