@@ -71,16 +71,21 @@ $$
 
 ---
 
-Express $$v_{\pi}(s)$$ in terms of $$q_{\pi}(s, a)$$:
+TODO: mention the definition of the probability functions pi and 4-argument p
 
+
+
+Express $$v_{\pi}(s)$$ in terms of $$q_{\pi}(s, a)$$:
 
 
 $$
 \begin{align*}
-v_{\pi}(s) &= \mathbb{E}_{a \sim \pi(s)} \left[ q_{\pi}(s, a) \right] \\
+v_{\pi}(s) &= \mathbb{E}_{a \sim \pi(s)} \left[ q_{\pi}(S_t, A_t) \mid S_t = s\right] \\
 &= \sum_{a \in \mathcal{A}} \pi(a \mid s) q_{\pi}(s, a)
 \end{align*}
 $$
+
+Comment: $$a \sim \pi(s)$$ means the value of $A_t$ (denoted by $a$ by definition of $$\pi$$) is drawn from a distribution specified by the value of $$S_t$$ (denoted by $$s$$ by definition of $$\pi$$). In other words, each $$a$$ is associated with a probability. This probability is necessary because $$A_t$$ is the only random variable inside the brackets ($$S_t$$ is used as a condition), and we need to know $$p(a \mid s)$$ (which is $$\pi(a \mid s)$$).
 
 
 
@@ -102,7 +107,7 @@ Express $$q_{\pi}(s, a)$$ in terms of $$v_{\pi}(s)$$:
 
 $$
 \begin{align*}
-q_{\pi}(s, a) &= \mathbb{E}_{(s', r) \sim p(s', r|s, a)} \left[ r + \gamma v_{\pi}(s')\right] \\
+q_{\pi}(s, a) &= \mathbb{E}_{(s', r) \sim p(s', r|s, a)} \left[ R_{t+1} + \gamma v_{\pi}(S_{t+1}) \mid S_{t}=s,A_{t}=a\right] \\
 &= \sum_{s'\in \mathcal{S}, r \in \mathcal{R}} p(s’, r \mid s, a) \left[ r + \gamma v_{\pi}(s') \right]
 \end{align*}
 $$
@@ -115,7 +120,7 @@ Express $$q_{\ast}(s, a)$$ in terms of $$v_{\ast}(s)$$:
 
 $$
 \begin{align*}
-q_{\ast}(s, a) &= \mathbb{E}_{(s', r) \sim p(s', r|s, a)} \left[ r + \gamma v_{\ast}(s')\right] \\
+q_{\ast}(s, a) &= \mathbb{E}_{(s', r) \sim p(s', r|s, a)} \left[ R_{t+1} + \gamma v_{\ast}(S_{t+1}) \mid  S_{t}=s, A_{t}=a\right] \\
 &= \sum_{s'\in \mathcal{S}, r \in \mathcal{R}} p(s’, r \mid s, a) \left[ r + \gamma v_{\ast}(s') \right]
 \end{align*}
 $$
@@ -131,8 +136,8 @@ Express $$v_{\pi}(s)$$ in terms of $$v_{\pi}(s)$$:
 
 $$
 \begin{align*}
-v_{\pi}(s) &= \mathbb{E}_{a \sim \pi(s)} \left[ q_{\pi}(s, a) \right] \\
-&= \mathbb{E}_{a \sim \pi(s)} \left[ \mathbb{E}_{(s', r) \sim p(s', r|s, a)} \left[ r + \gamma v_{\pi}(s')\right] \right]\\
+v_{\pi}(s) &= \mathbb{E}_{a \sim \pi(s)} \left[ q_{\pi}(S_t, A_t) \mid S_t=t\right] \\
+&= \mathbb{E}_{a \sim \pi(s)} \left[ \mathbb{E}_{(s', r) \sim p(s', r|s, a)} \left[ R_{t+1} + \gamma v_{\pi}(S_{t+1}) \mid A_t=a\right] \mid S_t = t\right]\\
 &= \sum_{a \in \mathcal{A}(s)} \pi(a \mid s) \sum_{s’ \in \mathcal{S}, r \in \mathcal{R}} p(s’, r \mid s, a)\left[ r + \gamma v_{\pi}(s’) \right]
 \end{align*}
 $$
@@ -146,7 +151,7 @@ Express  $$v_{\ast}(s)$$ in terms of  $$v_{\ast}(s)$$:
 $$
 \begin{align*}
 v_{\ast}(s) &= \max_{a \in \mathcal{A}} q_{\ast}(s, a) \\
-&= \max_{a \in \mathcal{A}} \mathbb{E}_{(s', r) \sim p(s', r|s, a)} \left[ r + \gamma v_{\ast}(s')\right]\\
+&= \max_{a \in \mathcal{A}} \mathbb{E}_{(s', r) \sim p(s', r|s, a)} \left[ R_{t+1} + \gamma v_{\ast}(S_{t+1}) \mid S_t=s, A_t=a\right]\\
 &= \max_{a \in \mathcal{A}} \sum_{s’ \in \mathcal{S}, r \in \mathcal{R}} p(s’, r \mid s, a)\left[ r + \gamma v_{\ast}(s’) \right]
 \end{align*}
 $$
@@ -159,8 +164,8 @@ Express $$q_{\pi}(s, a)$$ in terms of $$q_{\pi}(s, a)$$:
 
 $$
 \begin{align*}
-q_{\pi}(s, a) &= \mathbb{E}_{(s', r) \sim p(s', r|s, a)} \left[ r + \gamma v_{\pi}(s')\right] \\
-&= \mathbb{E}_{(s', r) \sim p(s', r|s, a)} \left[ r + \gamma \mathbb{E}_{a' \sim \pi(s')} \left[ q_{\pi}(s', a') \right] \right] \\
+q_{\pi}(s, a) &= \mathbb{E}_{(s', r) \sim p(s', r|s, a)} \left[ R_{t+1} + \gamma v_{\pi}(S_{t+1}) \mid S_t=s, A_t=a\right] \\
+&= \mathbb{E}_{(s', r) \sim p(s', r|s, a)} \left[ R_{t+1} + \gamma \mathbb{E}_{a' \sim \pi(s')} \left[ q_{\pi}(S_{t+1},  A_{t+1}) \mid S_{t+1}=s'\right] \mid S_t=s, A_t=a \right] \\
 &= \sum_{s'\in \mathcal{S}, r \in \mathcal{R}} p(s’, r \mid s, a) \left[ r + \gamma \sum_{a' \in \mathcal{A}} \pi(a' \mid s') q_{\pi}(s', a') \right]
 \end{align*}
 $$
@@ -172,9 +177,9 @@ Express $$q_{\ast}(s, a)$$ in terms of $$q_{\ast}(s, a)$$:
 
 $$
 \begin{align*}
-q_{\ast}(s, a) &= \mathbb{E}_{(s', r) \sim p(s', r|s, a)} \left[ r + \gamma v_{\ast}(s')\right] \\
-&= \mathbb{E}_{(s', r) \sim p(s', r|s, a)} \left[ r + \gamma \max_{a \in \mathcal{A}} q_{\pi}(s', a') \right] \\
-&= \sum_{s'\in \mathcal{S}, r \in \mathcal{R}} p(s’, r \mid s, a) \left[ r + \gamma \max_{a \in \mathcal{A}} q_{\pi}(s', a') \right]
+q_{\ast}(s, a) &= \mathbb{E}_{(s', r) \sim p(s', r|s, a)} \left[ R_{t+1} + \gamma v_{\ast}(S_{t+1}) \mid S_t=s, A_t=a\right] \\
+&= \mathbb{E}_{(s', r) \sim p(s', r|s, a)} \left[ R_{t+1} + \gamma \max_{a' \in \mathcal{A}} q_{\pi}(S_{t+1}, A_{t+1}) \mid S_t=s, A_t=a \right] \\
+&= \sum_{s'\in \mathcal{S}, r \in \mathcal{R}} p(s’, r \mid s, a) \left[ r + \gamma \max_{a' \in \mathcal{A}} q_{\pi}(s', a') \right]
 \end{align*}
 $$
 
