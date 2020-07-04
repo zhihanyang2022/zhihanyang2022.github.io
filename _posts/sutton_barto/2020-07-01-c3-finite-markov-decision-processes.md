@@ -1,7 +1,7 @@
 ---
 layout: post
-title:  "Finite Markov Decision Processes"
-date:   2020-06-23 23:02:25 -0500
+title:  “Sutton & Barto Chapter 3: Finite Markov Decision Processes"
+date:   2020-07-01 17:00:00 -0500
 categories: math
 ---
 

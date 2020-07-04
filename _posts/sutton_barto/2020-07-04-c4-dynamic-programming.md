@@ -129,7 +129,7 @@ The section of the book that discusses the algorithm above is well-written:
 
 
 
-<img src='/Users/yangzhihan/My Files/Typora Pics/image-20200703161203334.png'>
+<img src='https://i.loli.net/2020/07/05/rzJukHWjoyFapUb.png'>
 
 
 
