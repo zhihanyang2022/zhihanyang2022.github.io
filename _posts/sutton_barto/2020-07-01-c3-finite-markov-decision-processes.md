@@ -1,10 +1,9 @@
 ---
 layout: post
-title:  “Sutton & Barto Chapter 3: Finite Markov Decision Processes"
-date:   2020-07-01 17:00:00 -0500
+title:  "Sutton & Barto Chapter 3: Finite Markov Decision Processes"
+date:   2020-07-04 15:22:00 -0500
 categories: math
 ---
-
 <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
 
 - sd
