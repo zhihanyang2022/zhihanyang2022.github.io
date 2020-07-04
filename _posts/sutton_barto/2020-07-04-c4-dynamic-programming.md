@@ -13,7 +13,7 @@ categories: math
 
 
 
-<img src='https://i.loli.net/2020/07/05/CjF68HbZAtlMmwD.png' width=600>
+<img src='https://i.loli.net/2020/07/05/CjF68HbZAtlMmwD.png'>
 
 
 
@@ -121,7 +121,7 @@ $$
 
 
 
-<img src='https://i.loli.net/2020/07/05/RgFlrpceTNsMqLU.png' width=600>
+<img src='https://i.loli.net/2020/07/05/RgFlrpceTNsMqLU.png'>
 
 
 
@@ -184,7 +184,7 @@ $$
 
 
 
-<img src="https://i.loli.net/2020/07/05/u6XE8QrRiflypUz.png" width=600>
+<img src='https://i.loli.net/2020/07/05/u6XE8QrRiflypUz.png'>
 
 
 
