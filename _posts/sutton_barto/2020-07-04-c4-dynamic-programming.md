@@ -129,7 +129,7 @@ The section of the book that discusses the algorithm above is well-written:
 
 
 
-<img src='/Users/yangzhihan/My Files/Typora Pics/image-20200703161203334.png' width=600>
+<img src='/Users/yangzhihan/My Files/Typora Pics/image-20200703161203334.png'>
 
 
 
@@ -144,7 +144,7 @@ Note that the policy improvement step requires full knowledge of the MDP (the 4-
 $$
 \begin{array}{l}
 \text { 1. Initialization } \\
-\qquad Q(s, a) \in \mathbb{R} \text { arbitrarily for all } (s, a) \in \mathcal{S} \times \mathcal{A}; \pi(s) \in \mathcal{A}(s) \text { arbitrarily for all } s \in \mathcal{S} \\
+\qquad Q(s, a) \in \mathbb{R}^2 \text { arbitrarily for all } (s, a) \in \mathcal{S} \times \mathcal{A}; \pi(s) \in \mathcal{A}(s) \text { arbitrarily for all } s \in \mathcal{S} \\
 \text { 2. Policy Evaluation } \\ 
 \qquad\text { Loop: } \\ 
 \qquad\qquad
@@ -191,22 +191,22 @@ $$
 ### Value iteration using the action-value function (answer to Ex 4.10)
 
 
+
 $$
 \begin{array}{l}
-\text { Algorithm parameter: a small threshold } \theta>0 \text { determining accuracy of estimation } \\
-\text { Initialize } Q(s, a), \text { for all } (s, a) \in \mathcal{S}^{+} \times \mathcal{A}, \text {arbitrarily except that } Q(\text {terminal}, a)=0 \text{ for all } a \text{ in } \mathcal{A}. \\ 
-\text { Loop: } \\ 
+\text {Algorithm parameter: a small threshold } \theta>0 \text { determining accuracy of estimation } \\
+\text {Initialize } Q(s, a), \text { for all } (s, a) \in \mathcal{S}^{+} \times \mathcal{A}, \text {arbitrarily except that } Q(\text {terminal}, a)=0 \text{ for all } a \text{ in } \mathcal{A}. \\ 
+\text {Loop: } \\ 
 \qquad \begin{array}{l}
 \Delta \leftarrow 0 \\ 
 \qquad \begin{array}{l}
-\text { Loop for each } (s, a) \in \mathcal{S} \times \mathcal{A}: \\ 
+\text {Loop for each } (s, a) \in \mathcal{S} \times \mathcal{A}: \\ 
 q \leftarrow Q(s, a) \\ 
 Q(s, a) \leftarrow \sum_{s^{\prime}, r} p\left(s^{\prime}, r \mid s, a\right)\left[r+\gamma \max_{a'} Q\left(s^{\prime}, a'\right)\right] \\
 \end{array}\\
 \end{array}\\
-\text { until } \Delta<\theta \\
-\text { Output a deterministic policy, } \pi \approx \pi_{*}, \text { such that } \\
-\pi(s)=\arg \max _{a} Q(s, a)
+\text {until } \Delta<\theta \\
+\text {Output a deterministic policy, } \pi \approx \pi_{*}, \text { such that } \pi(s)=\arg \max _{a} Q(s, a).
 \end{array}
 $$
 
