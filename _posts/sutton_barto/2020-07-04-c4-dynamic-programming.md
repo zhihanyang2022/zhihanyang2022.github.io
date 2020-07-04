@@ -20,7 +20,7 @@ categories: math
 Notes:
 
 - All the updates done in DP algorithms are called **expected updates** because they are based on an expectation over all possible next states rather than on a sample next state.
-- The algorithm above is the **one-table implementation**; for the two-table version, we keep the new and old $V$’s as two tables. In practice, the one-table implementation usually converges faster because it uses new data as soon as they are available.
+- The algorithm above is the **one-table implementation**; for the two-table version, we keep the new and old $$V$$’s as two tables. In practice, the one-table implementation usually converges faster because it uses new data as soon as they are available.
 - The iterative policy evaluation **converges only in the limit**, so a termination condition is required.
 
 
@@ -33,7 +33,7 @@ Notes:
 
 
 
-**Theorem.** Given the state-value function of an arbitrary policy $$\pi$$, the new policy $$\pi’$$ obtained by acting greedy with respect to $v_{\pi}$ is guaranteed to be better than $$\pi$$, unless $$\pi$$ is already optimal. In the later case, $$\pi’$$ would be optimal, too.
+**Theorem.** Given the state-value function of an arbitrary policy $$\pi$$, the new policy $$\pi’$$ obtained by acting greedy with respect to $$v_{\pi}$$ is guaranteed to be better than $$\pi$$, unless $$\pi$$ is already optimal. In the later case, $$\pi’$$ would be optimal, too.
 
 **Proof.** Suppose we are in some arbitrary state $$s \in \mathcal{S}$$. The value of $$s$$ under some arbitrary policy $$\pi$$ is given by $$v_{\pi}(s)$$. Define $$\pi’(s)$$ as the new policy that acts greedily with respect $$v$$, that is,
 
