@@ -5,6 +5,8 @@ date:   2020-07-04 15:22:00 -0500
 categories: math
 ---
 
+<script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+
 - toc
 {:toc}
 ## 4.1 Policy evaluation
