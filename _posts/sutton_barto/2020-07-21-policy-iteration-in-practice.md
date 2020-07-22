@@ -23,11 +23,11 @@ I also show some galleries of learned value functions in the end along with thei
 
 In many problems, our goal is to learn the optimal **deterministic** policy. This is because deterministic policies perform optimally **all the time** and thus obtain the highest reward. 
 
-Policy iteration is an algorithmic that allows us to find the optimal policy and the optimal value function, but it has certain requirements. Here’s a quote on this from section 4.1 of Sutton & Barto 2018:
+Policy iteration is an algorithm that allows us to find the optimal policy and the optimal value function in the limit. It consists of two sub-algorithms: policy evaluation and policy improvement. Certain requirements need to be met for policy evaluation to work. Here’s a relevant quote from section 4.1 of Sutton & Barto 2018:
 
 > The existence and uniqueness of $$v_{\pi}$$ are guaranteed as long as either $$\gamma < 1$$ or eventual termination is guaranteed from all states under the policy $$\pi$$.
 
-To really understand this quote, let’s consider an **example**.
+To understand this quote, let’s consider an **example**.
 
 For simplicity, suppose there are only two states in a gridworld: one start state and one terminal state. The start state is on the left of the terminal state. Legal actions in non-terminal states (in this case, the start state only) are up, right, down and left and each action costs a reward of -1. After the agent arrives at the terminal state, the episode terminates and no further rewards are incurred. If the agent takes an action that makes itself outside of the gridworld, it is moved back to its last grid cell and receives a reward of -1.
 
@@ -73,40 +73,54 @@ $$
 Q_{\pi}(s, a) \leftarrow \sum_{s', r} p(s', r \mid s, a) \left[ r + \gamma \sum_{a'} \pi(a' \mid s') Q_{\pi}(s', a') \right]
 $$
 
-
 **Problem.** Given that we are using $$\gamma =1$$ (no discounting) and a deterministic policy, the action given by the policy when the agent is in the start state is up, since (state, up) has the highest q-value (I’m intentionally doing so to illustrate the problem, but this can of course occur in practice). But moving up in start state, according to the rules of this environment, return the agent back to the start state and the story repeats for an infinite number of times. In terms of the update rule:
-
-
 $$
 Q_{\pi}(\text{start}, \uparrow) \leftarrow (-1) + Q_{\pi}(\text{start}, \uparrow)
 $$
 
+which clearly does not make $$Q_\pi(\text{start}, \uparrow)$$ converge to a single real number and instead drives it to negative infinity.
 
+**Discounting.** Let’s consider what happens when we use $$\gamma < 1$$ and a deterministic policy. 
 
-which clearly does not make $$Q_\pi(\text{start}, \uparrow)$$ converge and drives it to negative infinity. 
+True value of $$Q_\pi(\text{start}, \uparrow)$$: $$(-1) + \gamma(-1) + \gamma^2 (-1) + \cdots = \sum_{k=0}^{\infty} \gamma^k (-1) = \frac{(-1)}{1 - \gamma}$$
 
-**Discounting.** Let’s consider using $$\gamma < 1$$ and a deterministic policy. The corresponding update rule looks like:
-
+The corresponding update rule looks like:
 
 $$
 Q_{\pi}(\text{start}, \uparrow) \leftarrow (-1) + \gamma Q_{\pi}(\text{start}, \uparrow)
 $$
 
+The first estimate is related to the initial estimate by the expression:
 
-which will drive $$Q_\pi(\text{start}, \uparrow)$$ to convergence when:
+$$
+Q_{\pi}^1(\text{start}, \uparrow) = (-1) + \gamma Q_{\pi}^0(\text{start}, \uparrow)
+$$
 
+The second estimate is related to the initial estimate by the expression:
 
 $$
 \begin{align}
-Q_{\pi}(\text{start}, \uparrow) &= (-1) + \gamma Q_{\pi}(\text{start}, \uparrow) \\
-(1 - \gamma) Q_{\pi}(\text{start}, \uparrow) &= -1 \\
-Q_{\pi}(\text{start}, \uparrow) &= \frac{-1}{1-\gamma}
+Q_{\pi}^2(\text{start}, \uparrow) &= (-1) + \gamma Q_{\pi}^1(\text{start}, \uparrow) \\
+&= (-1) + \gamma \left[ (-1) + \gamma Q_{\pi}^0(\text{start}, \uparrow) \right] \\
+&= (-1) + \gamma (-1) + \gamma^2 Q_{\pi}^0(\text{start}, \uparrow)
 \end{align}
 $$
 
+In general, the $$n$$-th estimate is related to the initial estimate by the expression:
+
+$$
+Q_{\pi}^n(\text{start}, \uparrow) = \sum_{k=0}^{n-1} \gamma^{k} (-1) + \gamma^n Q_{\pi}^0(\text{start}, \uparrow)
+$$
+
+As $$n$$ reaches infinity:
+
+$$
+Q_{\pi}^{\infty}(\text{start}, \uparrow)  =\sum_{k=0}^{\infty} \gamma^{k}(-1) = \frac{-1}{1 - \gamma}
+$$
+
+Since the estimate is equal to the true value in the limit, we see that policy evaluation indeed converges when discounting is used.
 
 **Epsilon-greedy policy.** Let’s consider using $$\gamma=1$$ and a epsilon-greedy policy (where $$\epsilon$$ is the probability of random chosing an action).
-
 
 $$
 Q_{\pi}(s, a) \leftarrow (-1) + (1 - \epsilon)Q_{\pi}(\text{start}, \uparrow) + \frac{\epsilon}{\mid A \mid}  \left[ Q_{\pi}(\text{start}, \uparrow) +Q_{\pi}(\text{start}, \rightarrow) + Q_{\pi}(\text{start}, \downarrow) + Q_{\pi}(\text{start}, \rightarrow) \right]
