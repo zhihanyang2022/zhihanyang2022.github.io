@@ -49,6 +49,7 @@ $$
 V_{\pi}(s) = \sum_{a} \pi(a \mid s) Q_{\pi}(s, a)
 $$
 
+
 $$
 Q_{\pi}(s, a) = \sum_{s', r} p(s', r \mid s, a) \left[ r + \gamma V_{\pi}(s) \right]
 $$
@@ -69,7 +70,7 @@ which can be easily turned into the following update rule:
 $$
 Q_{\pi}(s, a) \leftarrow \sum_{s', r} p(s', r \mid s, a) \left[ r + \gamma \sum_{a'} \pi(a' \mid s') Q_{\pi}(s', a') \right]
 $$
----
+
 
 **Problem.** Given that we are using $$\gamma =1$$ (no discounting) and a deterministic policy, the action given by the policy when the agent is in the start state is up, since (state, up) has the highest q-value (I’m intentionally doing so to illustrate the problem, but this can of course occur in practice). But moving up in start state, according to the rules of this environment, return the agent back to the start state and the story repeats for an infinite number of times. In terms of the update rule:
 
