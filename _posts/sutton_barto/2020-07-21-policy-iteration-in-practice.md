@@ -80,6 +80,8 @@ $$
 
 which clearly does not make $$Q_\pi(\text{start}, \uparrow)$$ converge to a single real number and instead drives it to negative infinity.
 
+---
+
 **Discounting.** Let’s consider what happens when we use $$\gamma < 1$$ and a deterministic policy. 
 
 True value of $$Q_\pi(\text{start}, \uparrow)$$: $$(-1) + \gamma(-1) + \gamma^2 (-1) + \cdots = \sum_{k=0}^{\infty} \gamma^k (-1) = \frac{(-1)}{1 - \gamma}$$
@@ -118,7 +120,7 @@ $$
 Q_{\pi}^{\infty}(\text{start}, \uparrow)  =\sum_{k=0}^{\infty} \gamma^{k}(-1) = \frac{-1}{1 - \gamma}
 $$
 
-Since the estimate is equal to the true value in the limit, we see that policy evaluation indeed converges when discounting is used.
+Since the estimate is equal to the true value in the limit, we see that policy evaluation indeed converges when discounting is used. Unlike previously, the true value of (start, up) is a real number and we can explicitly check for convergence by checking whether the difference between the LHS and the RHS of the update rule is smaller than some constant.
 
 **Epsilon-greedy policy.** Let’s consider using $$\gamma=1$$ and a epsilon-greedy policy (where $$\epsilon$$ is the probability of random chosing an action).
 
