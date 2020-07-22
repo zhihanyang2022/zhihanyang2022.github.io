@@ -197,7 +197,7 @@ algo = PolicyIteration(
 )
 ```
 
-<img src="2020-07-21-policy-iteration-in-practice/1.png">
+<img src="https://i.loli.net/2020/07/23/OX7LfYAsQFqES9J.png">
 
 **Book’s first approach: epsilon-greedy policy**
 
@@ -232,9 +232,9 @@ algo = PolicyIteration(
 )
 ```
 
-<img src="2020-07-21-policy-iteration-in-practice/0.png">
+<img src="https://i.loli.net/2020/07/23/ROTDc34wMe6ZAhG.png">
 
 Here’s a more sophicated environment with walls and traps (large negative rewards of -5):
 
-<img src="2020-07-21-policy-iteration-in-practice/2.png">
+<img src="https://i.loli.net/2020/07/23/almtEWnvpL3Frgh.png">
 
