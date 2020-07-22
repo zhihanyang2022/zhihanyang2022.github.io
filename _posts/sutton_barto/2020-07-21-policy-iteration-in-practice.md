@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  “Policy Iteration in Practice"
+title:  "Policy Iteration in Practice"
 date:   2020-07-21 11:30:00 -0500
 categories: math
 ---
@@ -9,11 +9,15 @@ categories: math
 
 - toc
 {:toc}
+## Introduction
+
 Algorithms introduced in Chapter 5 (Monte-Carlo methods) and Chapter 6 (TD methods) of Sutton & Barto 2018 approximate the optimal q-table to achieve control. Since these methods were a bit hard to debug and only converge in the limit, I needed a tool to compute the exact optimal q-table to evaluate their performance. Therefore, I went back to Chapter 4 (dynamic programming) and implemented the policy iteration algorithm using q-tables with this question in mind:
 
 > Can policy iteration be used to learn optimal deterministic policies and their corresponding optimal value functions?
 
-### Book: Yes, but use either discounting or non-deterministic policy.
+I also show some galleries of learned value functions in the end along with their source code.
+
+## Book: Yes, but use either discounting or non-deterministic policy.
 
 In many problems, our goal is to learn the optimal **deterministic** policy. This is because deterministic policies perform optimally **all the time** and thus obtain the highest reward. 
 
@@ -39,6 +43,8 @@ Suppose this q-table looks like this:
 | start state |  left  |  -0.2   |
 
 **Policy evaluation.** First, we do policy evaluation. Note that the agent’s policy is NOT updated at all during this procedure. Let’s derive an update rule for policy evaluation. The relationship between $$V_{\pi}$$ and $$Q_\pi$$ is listed below:
+
+
 $$
 V_{\pi}(s) = \sum_{a} \pi(a \mid s) Q_{\pi}(s, a)
 $$
@@ -47,28 +53,46 @@ $$
 Q_{\pi}(s, a) = \sum_{s', r} p(s', r \mid s, a) \left[ r + \gamma V_{\pi}(s) \right]
 $$
 
+
+
 Since we store the q-table, we would like both the LHS and RHS to be expressed in terms of $$Q_\pi$$. To do this, we substitue equation 1 into equation 2 and get:
+
+
 $$
 Q_{\pi}(s, a) = \sum_{s', r} p(s', r \mid s, a) \left[ r + \gamma \sum_{a'} \pi(a' \mid s') Q_{\pi}(s', a') \right]
 $$
+
+
 which can be easily turned into the following update rule:
+
+
 $$
 Q_{\pi}(s, a) \leftarrow \sum_{s', r} p(s', r \mid s, a) \left[ r + \gamma \sum_{a'} \pi(a' \mid s') Q_{\pi}(s', a') \right]
 $$
 ---
 
 **Problem.** Given that we are using $$\gamma =1$$ (no discounting) and a deterministic policy, the action given by the policy when the agent is in the start state is up, since (state, up) has the highest q-value (I’m intentionally doing so to illustrate the problem, but this can of course occur in practice). But moving up in start state, according to the rules of this environment, return the agent back to the start state and the story repeats for an infinite number of times. In terms of the update rule:
+
+
 $$
 Q_{\pi}(\text{start}, \uparrow) \leftarrow (-1) + Q_{\pi}(\text{start}, \uparrow)
 $$
 
+
+
 which clearly does not make $$Q_\pi(\text{start}, \uparrow)$$ converge and drives it to negative infinity. 
 
 **Discounting.** Let’s consider using $$\gamma < 1$$ and a deterministic policy. The corresponding update rule looks like:
+
+
 $$
 Q_{\pi}(\text{start}, \uparrow) \leftarrow (-1) + \gamma Q_{\pi}(\text{start}, \uparrow)
 $$
+
+
 which will drive $$Q_\pi(\text{start}, \uparrow)$$ to convergence when:
+
+
 $$
 \begin{align}
 Q_{\pi}(\text{start}, \uparrow) &= (-1) + \gamma Q_{\pi}(\text{start}, \uparrow) \\
@@ -76,13 +100,19 @@ Q_{\pi}(\text{start}, \uparrow) &= (-1) + \gamma Q_{\pi}(\text{start}, \uparrow)
 Q_{\pi}(\text{start}, \uparrow) &= \frac{-1}{1-\gamma}
 \end{align}
 $$
+
+
 **Epsilon-greedy policy.** Let’s consider using $$\gamma=1$$ and a epsilon-greedy policy (where $$\epsilon$$ is the probability of random chosing an action).
+
+
 $$
 Q_{\pi}(s, a) \leftarrow (-1) + (1 - \epsilon)Q_{\pi}(\text{start}, \uparrow) + \frac{\epsilon}{\mid A \mid}  \left[ Q_{\pi}(\text{start}, \uparrow) +Q_{\pi}(\text{start}, \rightarrow) + Q_{\pi}(\text{start}, \downarrow) + Q_{\pi}(\text{start}, \rightarrow) \right]
 $$
+
+
 If may be slightly harder to see why this update rule will drive $$Q_\pi(\text{start}, \uparrow)$$ to convergence, since $$Q_\pi(\text{start}, \uparrow)$$ also depends on the values of other state-action pairs (unlike in discounting), so this may require a proof. But assuming that policy evaluation will drive $$Q_\pi(\text{start}, \uparrow)$$ closer and closer to its true value, convergence is guaranteed as long as its true value is finite. By definition, $$Q_\pi(\text{start}, \uparrow)$$ is the expected cumulative reward of taking $$\uparrow$$ into the start state and then follow $$\pi$$. If $$\pi$$ is epsilon-greedy, then the expected length of the trajectory from the start state to the terminal state is finite, since an infinitely long trajectory (always taking the greedy action) will get zero probability, i.e., $$\lim_{n \rightarrow \infty}(1 - \epsilon)^{n} =0$$. It follows that, if a finite reward (in this case, -1) is incurred at each step on the trajectory, the true value of $$Q_\pi(\text{start}, \uparrow)$$ would be finite.
 
-### Me: I would like to learn a deterministic policy without using discounting.
+## Me: I would like to learn a deterministic policy without using discounting.
 
 Personally, I find neither of these approaches satisfactory. 
 
