@@ -77,7 +77,9 @@ $$
 A_{n+1} \leftarrow A_n + \alpha (a_n - A_n) 
 \end{align*}
 $$
+
 Here’s a perhaps more intuitive way of rewriting this update rule:
+
 $$
 \begin{align*}
 A_{n+1} \leftarrow (1 - \alpha) A_n + \alpha a_n
