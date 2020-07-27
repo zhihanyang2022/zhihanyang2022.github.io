@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "SARSA and Q-Learning - Theory and Practice"
+title:  "TD Control - SARSA and Q-Learning"
 date:   2020-07-25 18:00:00 -0500
 categories: math
 ---
@@ -15,7 +15,7 @@ This post discusses the intuition of SARSA and Q-learning, which in my opinion i
 
 ## Value iteration
 
-To motivate the TD control algorithm, it is convenient to begin with the value iteration algorithm:
+To motivate the TD control algorithm, it is convenient to begin with the value iteration algorithm (the extreme version of truncated policy iteration):
 
 - Initialize $$Q(s, a)$$ for all $$(s, a)$$ pairs arbitrarily except that $$Q(\text{terminal}, \cdot) = 0$$.
 - Loop through all $$(s, a)$$’s:
@@ -41,7 +41,7 @@ The update rule can be used to evaluate a target policy (which we shall denote b
 
 Nevertheless, a behavior policy that assigns the most probability to actions that are also the most probable under the target policy would visit the state-action pairs that are more relevant to optimal behavior more often.
 
-**Assumption 3 can be removed** by making both the outer and inner expectation of the update rule implicit through sampling:
+**Assumption 3 can be removed** by making both the outer (and inner expectation) of the update rule implicit through sampling:
 
 - Previously: $$q_{\pi}(s, a) \leftarrow \sum_{s’, r} p(s’, r \mid s, a) \left[ r + \sum_{a'} \pi(a' \mid s’) q_{\pi}(s’, a’) \right]$$
 - Now: $$q_{\pi}(s, a) \leftarrow \text{the average of all samples (with more weight given to recent ones)}$$ 
@@ -50,6 +50,8 @@ Nevertheless, a behavior policy that assigns the most probability to actions tha
 If $$b=\pi$$, we have SARSA. SARSA is on-policy because it is behaving according to and evaluating the same policy.
 
 If $$\pi$$ is a greedy policy, we have Q-learning. Q-learning is off-policy because it evaluates a target policy that is different from the behavior policy used for acting.
+
+If the inner expectation is explicit, we have expected SARSA.
 
 The practical differences between SARSA and Q-learning will be addressed later in this post.
 
@@ -113,3 +115,24 @@ Loop for each episode:
     
     until s is terminal.
 ```
+
+## Empirical comparision of SARSA and Q-learning
+
+### Environment
+
+
+
+### Online performance (from behavior policy)
+
+
+
+### Number of updates for each state-action pair
+
+
+
+### Offline performance (from target policy)
+
+
+
+
+
