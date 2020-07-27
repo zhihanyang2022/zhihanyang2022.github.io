@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "TD Control - SARSA and Q-Learning"
+title:  "TD Control - SARSA (on) and Q-Learning (off)"
 date:   2020-07-25 18:00:00 -0500
 categories: math
 ---

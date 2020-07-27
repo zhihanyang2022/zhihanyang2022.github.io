@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "TD Prediction"
+title:  "TD Prediction - On- and Off-policy"
 date:   2020-07-27 10:00:00 -0500
 categories: math
 ---
@@ -53,7 +53,7 @@ Algorithm parameter: alpha in (0, 1]
 Initialize V(s), for all s in S+, with V(terminal) = 0
 
 Loop for each episode:
-    b <- ay policy with coverage of pi
+    b <- any policy with coverage of pi
     Loop for each step of episode:
         
         # the behavior policy is justed for visiting all states
@@ -74,7 +74,7 @@ Loop for each episode:
     until S is terminal.
 ```
 
-But this algorithm assumes that we can take an action in some state, and then immediately return to that state and take a different action. In general, this is not possible. To get rid of this assumption, we 1) use the reward and next state under the behavior policy in the value update formula but 2) correct that formula with a weighted importance sampling ratio to account for the fact that we really want samples under the target policy.
+But this algorithm assumes that we can take an action in some state, and then immediately return to that state and take a different action. In general, this is not possible. To get rid of this assumption, we 1) use the reward and next state under the behavior policy in the value update formula but 2) correct that formula with a weighted importance sampling ratio to account for the fact that what we really want are samples under the target policy.
 
 ```
 Input: an arbitrary target policy pi
@@ -101,3 +101,4 @@ Loop for each episode:
 ```
 
 The relevant derivation of these update rules can be found in section 5.6 of Sutton & Barto (2018), although there were derived in terms of Monte Carlo methods. Unfortunately, I don’t think these update rules take into account of the fact that recent samples are more “correct” than old samples.
+
