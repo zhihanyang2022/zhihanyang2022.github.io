@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "TD Prediction - On- and Off-policy"
+title:  "TD Prediction"
 date:   2020-07-27 10:00:00 -0500
 categories: math
 ---

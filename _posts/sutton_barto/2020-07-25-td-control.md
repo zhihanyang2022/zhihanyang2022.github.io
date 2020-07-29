@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "TD Control - SARSA (on) and Q-Learning (off)"
+title:  "TD Control - SARSA and Q-Learning"
 date:   2020-07-25 18:00:00 -0500
 categories: math
 ---
@@ -99,13 +99,13 @@ Loop for each episode:
     Initialize s to be the starting state.
     Loop:
         
-        Choose a from the epsilon-greedy policy derived from Q.
+        Choose a from the epsilon-greedy (behavior) policy derived from Q.
         Take action a, observe s' and r.
             
         If mode is SARSA:
-             Choose a' from the epsilon-greedy policy derived from Q.
+             Choose a' from the epsilon-greedy (target) policy derived from Q.
         If mode is Q-learning:
-             Choose a' from the greedy policy derived from Q.
+             Choose a' from the greedy (target) policy derived from Q.
             
         Bellman sample = r + Q(s', a')
         
@@ -120,19 +120,69 @@ Loop for each episode:
 
 ### Environment
 
+One way to understand the practical differences between SARSA and Q-learning is running them through a cliff-walking gridworld. For example, the following gridworld has 5 rows and 15 columns. Green regions represent walkable squares. Here’s the mapping from index to meaning:
 
+- 1: the starting state
+- 4: the terminal state (stepping into this causes an epside to terminate; the policy is sent back to the starting state)
+- 3: traps (stepping into a trap causes a -100 reward; the policy continue to take actions from this state though)
 
-### Online performance (from behavior policy)
+Other than traps, stepping into a square incurs a reward of -1.
 
+<img src='https://i.loli.net/2020/07/28/rvEBFeyNJ7onCKp.png'>
 
+### Online performance
 
-### Number of updates for each state-action pair
+Online performance is the performance of the behavior policy. Here are some important observations:
 
+1. Q-Learning's best performance is optimal (the best possible) but SARSA's best performance is not.
+2. In terms of smoothed performance, SARSA is better than Q-learning most of the times.
+3. SARSA occasionally have sudden drops in performance.
 
+Now, let’s try to understand the intuition behind these observations.
 
-### Offline performance (from target policy)
+<img src="https://i.loli.net/2020/07/28/FfkQOgyP2HT6KCL.png">
 
+### In-depth explanation of online performance
 
+Just like policy iteration / value iteration, Q-learning learns the value of the optimal greedy policy, which travels around the cliff as follows. However, during training (online), the total reward per episode is collected by the behavior policy, which is epsilon-greedy. When the behavior policy tries to walk around the cliff, its randomness can easily cause it to take an suboptimal action into a trap.
 
+Figure 1. The greedy trajectory learned by Q-learning.
 
+Legend:
+
+- Orange: grids that are on the learned greedy trajectory
+- Red: grids at which the learned greedy policy behaves sub-optimally (with respect to a policy-iteration baseline)
+
+<img src='https://i.loli.net/2020/07/29/yquiQ4wVZN6HvoX.jpg'>
+
+On the other hand, SARSA takes this randomness into account because it learns the value of the behavior policy. Therefore, it uses extra 2 actions, one at the beginning of trajectory and another at the end, to exchange for a safer path.
+
+Figure 2. The greedy trajectory learned by SARSA.
+
+<img src='https://i.loli.net/2020/07/29/3D8es7hqgyMBSC2.jpg'>
+
+Explanations:
+
+1. Q-learning's best performance is optimal but SARSA's best performance is not.
+    - For reasons explained above, Q-learning learns the optimal greedy trajectory while SARSA doesn’t. Although Q-learning's behavior policy is epsilon-greedy, while training, it is still possible for the behavior policy to always take greedy actions over an entire trajectory. When this happens, the total return of the trajectory is optimal.
+2. In terms of smoothed performance, SARSA is better than Q-learning most of the times.
+    - Both Q-learning and SARSA uses the same epsilon-greedy behavior policy. However, the behavior policy of Q-learning walks closer to the traps and thus it is more likely to take an action into a trap due to randomness and receive a -100 reward.
+3. SARSA occasionally have sudden drops in performance.
+    - The behavior policy takes greedy actions most of the times and take random actions by 10% of the times.
+    - This means that the state-action pairs on the greedy trajectory are encountered and evaluated more often; the number of evaluations for surrounding grids fall off exponentially as their distances to the greedy trajectory increase.
+    - For SARSA, traps are 1 grid away from the greedy trajectory.
+    - For Q-learning, traps are right next to the greedy trajectory.
+    - For this reason, Q-learning evaluates actions in traps much frequently (Figure 3) and the greedy actions in all traps are upwards (also optimal) (Figure 1), which will lead the agent immediately out of the trap.
+    - On the other hand, SARSA evaluates actions in traps only occasionally (Figure 4) and, even after 10000 episodes of training, the greedy actions for three traps are non-optimal* (Figure 1), which will lead the agent into another trap.
+    - To put everything in a nutshell, although SARSA encounter less traps on average, when it does encounter one, it is more likely encounter several other traps because some actions in traps have incorrect values and thus the corresponding greedy actions are non-optimal*.
+
+*with respect to the environment and the epsilon-greedy behavior policy
+
+Figure 3: Number of evaluations for each state after running 10000 episodes of Q-learning. 
+
+<img src='https://i.loli.net/2020/07/28/dfqrea8DpKCjF5T.jpg'>
+
+Figure 4: Number of evaluations for each state after running 10000 episodes of SARSA.
+
+<img src='https://i.loli.net/2020/07/28/81ghSFAaejqCvXc.jpg'>
 
