@@ -116,7 +116,7 @@ Loop for each episode:
     until s is terminal.
 ```
 
-## Empirical comparision of SARSA and Q-learning
+## Cliff-walking experiment
 
 ### Environment
 
