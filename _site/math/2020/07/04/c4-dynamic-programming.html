@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.6.0 -->
+<title>Sutton &amp; Barto Chapter 4: Dynamic Programming | Zhihan’s Deep RL Notes</title>
+<meta name="generator" content="Jekyll v3.8.5" />
+<meta property="og:title" content="Sutton &amp; Barto Chapter 4: Dynamic Programming" />
+<meta name="author" content="Zhihan Yang" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Zhihan’s notes on deep reinforcement learning. For Pytorch implementations, check out https://github.com/zhihanyang2022/deeprl_notes." />
+<meta property="og:description" content="Zhihan’s notes on deep reinforcement learning. For Pytorch implementations, check out https://github.com/zhihanyang2022/deeprl_notes." />
+<link rel="canonical" href="http://localhost:4000/math/2020/07/04/c4-dynamic-programming.html" />
+<meta property="og:url" content="http://localhost:4000/math/2020/07/04/c4-dynamic-programming.html" />
+<meta property="og:site_name" content="Zhihan’s Deep RL Notes" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-07-04T15:22:00-05:00" />
+<script type="application/ld+json">
+{"description":"Zhihan’s notes on deep reinforcement learning. For Pytorch implementations, check out https://github.com/zhihanyang2022/deeprl_notes.","author":{"@type":"Person","name":"Zhihan Yang"},"@type":"BlogPosting","url":"http://localhost:4000/math/2020/07/04/c4-dynamic-programming.html","headline":"Sutton &amp; Barto Chapter 4: Dynamic Programming","dateModified":"2020-07-04T15:22:00-05:00","datePublished":"2020-07-04T15:22:00-05:00","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/math/2020/07/04/c4-dynamic-programming.html"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="Zhihan's Deep RL Notes" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">Zhihan&#39;s Deep RL Notes</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Sutton &amp; Barto Chapter 4: Dynamic Programming</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2020-07-04T15:22:00-05:00" itemprop="datePublished">Jul 4, 2020
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+
+<ul id="markdown-toc">
+  <li><a href="#41-policy-evaluation" id="markdown-toc-41-policy-evaluation">4.1 Policy evaluation</a></li>
+  <li><a href="#42-policy-improvement" id="markdown-toc-42-policy-improvement">4.2 Policy improvement</a>    <ul>
+      <li><a href="#policy-improvement-theorem" id="markdown-toc-policy-improvement-theorem">Policy improvement theorem</a></li>
+    </ul>
+  </li>
+  <li><a href="#43-policy-iteration" id="markdown-toc-43-policy-iteration">4.3 Policy iteration</a>    <ul>
+      <li><a href="#policy-iteration-using-the-state-value-function" id="markdown-toc-policy-iteration-using-the-state-value-function">Policy iteration using the state-value function</a></li>
+      <li><a href="#policy-iteration-using-the-action-value-function-answer-to-ex-45" id="markdown-toc-policy-iteration-using-the-action-value-function-answer-to-ex-45">Policy iteration using the action-value function (answer to Ex 4.5)</a></li>
+    </ul>
+  </li>
+  <li><a href="#44-value-iteration" id="markdown-toc-44-value-iteration">4.4 Value iteration</a>    <ul>
+      <li><a href="#value-iteration-using-the-state-value-function" id="markdown-toc-value-iteration-using-the-state-value-function">Value iteration using the state-value function</a></li>
+      <li><a href="#value-iteration-using-the-action-value-function-answer-to-ex-410" id="markdown-toc-value-iteration-using-the-action-value-function-answer-to-ex-410">Value iteration using the action-value function (answer to Ex 4.10)</a></li>
+    </ul>
+  </li>
+  <li><a href="#45-asychronous-dynamic-programming" id="markdown-toc-45-asychronous-dynamic-programming">4.5 Asychronous dynamic programming</a></li>
+  <li><a href="#46-generalize-policy-iteration" id="markdown-toc-46-generalize-policy-iteration">4.6 Generalize policy iteration</a></li>
+  <li><a href="#47-efficiency-of-dynamic-programming" id="markdown-toc-47-efficiency-of-dynamic-programming">4.7 Efficiency of dynamic programming</a></li>
+</ul>
+<h2 id="41-policy-evaluation">4.1 Policy evaluation</h2>
+
+<p><img src="https://i.loli.net/2020/07/05/CjF68HbZAtlMmwD.png" /></p>
+
+<p>Notes:</p>
+
+<ul>
+  <li>All the updates done in DP algorithms are called <strong>expected updates</strong> because they are based on an expectation over all possible next states rather than on a sample next state.</li>
+  <li>The algorithm above is the <strong>one-table implementation</strong>; for the two-table version, we keep the new and old <script type="math/tex">V</script>’s as two tables. In practice, the one-table implementation usually converges faster because it uses new data as soon as they are available.</li>
+  <li>The iterative policy evaluation <strong>converges only in the limit</strong>, so a termination condition is required.</li>
+</ul>
+
+<h2 id="42-policy-improvement">4.2 Policy improvement</h2>
+
+<h3 id="policy-improvement-theorem">Policy improvement theorem</h3>
+
+<p><strong>Theorem.</strong> Given the state-value function of an arbitrary policy <script type="math/tex">\pi</script>, the new policy <script type="math/tex">\pi’</script> obtained by acting greedy with respect to <script type="math/tex">v_{\pi}</script> is guaranteed to be better than <script type="math/tex">\pi</script>, unless <script type="math/tex">\pi</script> is already optimal. In the later case, <script type="math/tex">\pi’</script> would be optimal, too.</p>
+
+<p><strong>Proof.</strong> Suppose we are in some arbitrary state <script type="math/tex">s \in \mathcal{S}</script>. The value of <script type="math/tex">s</script> under some arbitrary policy <script type="math/tex">\pi</script> is given by <script type="math/tex">v_{\pi}(s)</script>. Define <script type="math/tex">\pi’(s)</script> as the new policy that acts greedily with respect <script type="math/tex">v</script>, that is,</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{align*}
+\pi'(s) 
+&\triangleq \text{argmax}_{a} q_{\pi}(s, a) \\
+&= \text{argmax}_{a} \sum_{s', r} p(s', r \mid s, a) \left[ r + \gamma v_{\pi}(s') \right]
+\end{align*} %]]></script>
+
+<p>We want to show that <script type="math/tex">\pi’</script> is guaranteed to be better than <script type="math/tex">\pi</script>, unless <script type="math/tex">\pi</script> is already optimal.</p>
+
+<p>Because of how <script type="math/tex">\pi’</script> is defined, it must be that <script type="math/tex">q_{\pi}(s, \pi’(s)) \geq q_{\pi}(s, \pi(s)) = v_{\pi}(s)</script> because we have acted greedily. This is because <script type="math/tex">\pi</script> is not necessarily greedy with respect to its own value function, which may be counter-intuitive. For an example of this, see Figure 4.1 on page 77.</p>
+
+<p>Since <script type="math/tex">s</script> was chosen arbitrarily, we have <script type="math/tex">q_{\pi}(s, \pi’(s)) \geq v_{\pi}(s)</script> for all <script type="math/tex">s \in \mathcal{S}</script>. Then <script type="math/tex">v_{\pi'}(s) \geq v_{\pi}(s)</script> for all <script type="math/tex">s \in \mathcal{S}</script>  by the lemma below.</p>
+
+<p>Case 1. <script type="math/tex">v_{\pi’}(s) = v_{\pi}(s)</script> for all <script type="math/tex">s \in \mathcal{S}</script>.</p>
+
+<ul>
+  <li>Then <script type="math/tex">v_{\pi’}(s) = \max_a \sum_{s, a} p(s’, r \mid s, a)\left[ r + \gamma v_{\pi}(s’) \right] \text{(iterative backup rule)}=\max_a \sum_{s, a} p(s’, r \mid s, a)\left[ r + \gamma v_{\pi'}(s’) \right]</script>, which is the same the Bellman optimality equation.</li>
+  <li>Recall that the optimal value function is the unique solution to the Bellman optimality equation.</li>
+  <li>Therefore, <script type="math/tex">v_{\pi} = v_{\pi’} = v_{\ast}</script> (the optimal state-value function) and <script type="math/tex">\pi=\pi’=\pi_{\ast}</script> (the optimal policy).</li>
+</ul>
+
+<p>Case 2. <script type="math/tex">\exists s \in \mathcal{S} (v_{\pi’}(s) > v_{\pi}(s))</script>.</p>
+
+<ul>
+  <li><script type="math/tex">\pi’</script> is better than <script type="math/tex">\pi</script> because, for at least one <script type="math/tex">s \in \mathcal{S}</script>, it collects more return in expectation.</li>
+</ul>
+
+<p><strong>Lemma.</strong> If <script type="math/tex">q_{\pi}(s, \pi’(s)) \geq v_{\pi}(s)</script> for all <script type="math/tex">s \in \mathcal{S}</script>,  then <script type="math/tex">v_{\pi'}(s) \geq v_{\pi}(s)</script> for all <script type="math/tex">s \in \mathcal{S}</script>.</p>
+
+<p><strong>Proof.</strong></p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{aligned} 
+v_{\pi}(s) 
+& \leq q_{\pi}\left(s, \pi^{\prime}(s)\right) \\ 
+&\stackrel{(1)}{=}\mathbb{E}\left[R_{t+1}+\gamma v_{\pi}\left(S_{t+1}\right) \mid S_{t}=s, A_{t}=\pi^{\prime}(s)\right] \\
+&\stackrel{(2)}{=}\mathbb{E}_{\pi^{\prime}}\left[R_{t+1}+\gamma v_{\pi}\left(S_{t+1}\right) \mid S_{t}=s\right] \\
+& \leq \mathbb{E}_{\pi^{\prime}}\left[R_{t+1}+\gamma q_{\pi}\left(S_{t+1}, \pi^{\prime}\left(S_{t+1}\right)\right) \mid S_{t}=s\right] \\ 
+&\stackrel{(3)}{=}\mathbb{E}_{\pi^{\prime}}\left[R_{t+1}+\gamma \mathbb{E}_{\pi^{\prime}}\left[R_{t+2}+\gamma v_{\pi}\left(S_{t+2}\right) \mid S_{t+1} \right] \mid S_{t}=s\right] \\ 
+&\stackrel{(4)}{=}\mathbb{E}_{\pi^{\prime}}\left[R_{t+1}+\gamma R_{t+2}+\gamma^{2} v_{\pi}\left(S_{t+2}\right) \mid S_{t}=s\right] \\ 
+& \leq \mathbb{E}_{\pi^{\prime}}\left[R_{t+1}+\gamma R_{t+2}+\gamma^{2} R_{t+3}+\gamma^{3} v_{\pi}\left(S_{t+3}\right) \mid S_{t}=s\right] \\ 
+& \vdots \\ 
+& \leq \mathbb{E}_{\pi^{\prime}}\left[R_{t+1}+\gamma R_{t+2}+\gamma^{2} R_{t+3}+\gamma^{3} R_{t+4}+\cdots \mid S_{t}=s\right] \\ 
+&=v_{\pi^{\prime}}(s) \end{aligned} %]]></script>
+
+<p>Notes:</p>
+
+<ul>
+  <li>The way expectations are used here is quite peculiar and therefore worth discussion.
+    <ul>
+      <li>Conventionally, the expectation of a discrete random variable <script type="math/tex">X</script> is denoted by <script type="math/tex">\mathbb{E}_{X \sim P} \left[ X \right]</script> where the subscript of the expectation tells us how to look for the probability for each value <script type="math/tex">x</script> of <script type="math/tex">X</script> - simply using <script type="math/tex">P(x)</script>.</li>
+      <li>Here, the subscripts merely contain the probability distributions (<script type="math/tex">\pi’(a \mid s)</script> explicitly and the 4-argument <script type="math/tex">p(s’, r \mid s, a)</script> implicitly) that are necessary to compute the probability distribution of the random variable of interest (which is kind of lazy but neat).
+        <ul>
+          <li>In equation 1, <script type="math/tex">\mathbb{E} \left[\cdot \right]</script> denotes the expected value of a random variable given the dynamics of the MDP.</li>
+          <li>In equation 2, <script type="math/tex">\mathbb{E}_{\pi'} \left[\cdot \right]</script> denotes the expected value of a random variable given the dynamics of the MDP and that the agent follows policy <script type="math/tex">\pi’</script> in the current time-step.</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>Equation 3: just like what we did in equation 2 (the book made a mistake here but here it has been corrected).</li>
+  <li>Equation 4: it may not be super intuitive how this is obtained; here are some intermediate steps that make things easier.
+    <ul>
+      <li>Equation a: by linearity of expectations.</li>
+      <li>Equation b: by the law of total expectations (or Adam’s law).</li>
+      <li>Equation c: by linearity of expectations.</li>
+    </ul>
+  </li>
+</ul>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{align*}
+\mathbb{E}_{\pi^{\prime}}\left[R_{t+1}+\gamma \mathbb{E}_{\pi^{\prime}}\left[R_{t+2}+\gamma v_{\pi}\left(S_{t+2}\right) \mid S_{t+1} \right] \mid S_{t}=s\right]
+
+&\stackrel{(a)}{=} \mathbb{E}_{\pi^{\prime}}\left[R_{t+1} \mid S_t=s\right] + \gamma \mathbb{E}_{\pi^{\prime}}\left[ \mathbb{E}_{\pi^{\prime}}\left[R_{t+2}+\gamma v_{\pi}\left(S_{t+2}\right) \mid S_{t+1} \right] \mid S_t=s \right]\\
+
+&\stackrel{(b)}{=} \mathbb{E}_{\pi^{\prime}}\left[R_{t+1} \mid S_t=s\right] + \gamma \mathbb{E}_{\pi^{\prime}}\left[R_{t+2}+\gamma v_{\pi}\left(S_{t+2}\right)\mid S_t=s \right]\\
+&\stackrel{(c)}{=}\mathbb{E}_{\pi^{\prime}}\left[R_{t+1}+\gamma R_{t+2}+\gamma^{2} v_{\pi}\left(S_{t+2}\right) \mid S_{t}=s\right] \\ 
+\end{align*} %]]></script>
+
+<h2 id="43-policy-iteration">4.3 Policy iteration</h2>
+
+<h3 id="policy-iteration-using-the-state-value-function">Policy iteration using the state-value function</h3>
+
+<p><img src="https://i.loli.net/2020/07/05/RgFlrpceTNsMqLU.png" /></p>
+
+<p>The section of the book that discusses the algorithm above is well-written:</p>
+
+<p><img src="https://i.loli.net/2020/07/05/rzJukHWjoyFapUb.png" /></p>
+
+<p>Note that the policy improvement step requires full knowledge of the MDP (the 4-argument p) and easy ways to access the possible next rewards and states. This is not required for policy iteration using the action-value function - that’s why algorithms like SARSA estimates the action-value function instead of the state-value function.</p>
+
+<h3 id="policy-iteration-using-the-action-value-function-answer-to-ex-45">Policy iteration using the action-value function (answer to Ex 4.5)</h3>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{array}{l}
+\text { 1. Initialization } \\
+\qquad Q(s, a) \in \mathbb{R}^2 \text { arbitrarily for all } (s, a) \in \mathcal{S} \times \mathcal{A}; \pi(s) \in \mathcal{A}(s) \text { arbitrarily for all } s \in \mathcal{S} \\
+\text { 2. Policy Evaluation } \\ 
+\qquad\text { Loop: } \\ 
+\qquad\qquad
+\begin{array}{l}
+\Delta \leftarrow 0 \\ 
+\text { Loop for each } (s, a) \in \mathcal{S} \times \mathcal{A} \text { : } \\
+\qquad q \leftarrow Q(s, a) \\
+\qquad Q(s, a) \leftarrow \sum_{s^{\prime}, r} p\left(s^{\prime}, r \mid s, a\right)\left[r+\gamma Q\left(s^{\prime}, \pi(s')\right)\right] \\ 
+\Delta \leftarrow \max (\Delta,|q-Q(s, a)|) \\
+\text { until } \Delta<\theta \text { (a small positive number determining the accuracy of estimation) }
+\end{array} \\
+% part 3: policy improvement
+\begin{array}{l}
+\text { 3. Policy Improvement } \\ 
+\qquad
+\begin{array}{l}
+\text {policy-stable } \leftarrow \text { true } \\ 
+\text {For each } s \in \mathcal{S} \text { : } \\ 
+\qquad \begin{array}{l}
+\text {old-action } \leftarrow \pi(s) \\
+\pi(s) \leftarrow \arg \max _{a} Q(s, a)\\ 
+\text {If old-action } \neq \pi(s) \text{ and } Q(s, \text{old-action}) \neq Q(s, \pi(s)), \text { then policy-stable } \leftarrow \text { false }
+\end{array} \\
+\text{If policy-stable, then stop and return } Q \approx q_{\ast} \text{ and } \pi \approx \pi_{\ast}; \text{else go to }2.
+\end{array}
+\end{array}
+\end{array} %]]></script>
+
+<h2 id="44-value-iteration">4.4 Value iteration</h2>
+
+<h3 id="value-iteration-using-the-state-value-function">Value iteration using the state-value function</h3>
+
+<p><img src="https://i.loli.net/2020/07/05/u6XE8QrRiflypUz.png" /></p>
+
+<h3 id="value-iteration-using-the-action-value-function-answer-to-ex-410">Value iteration using the action-value function (answer to Ex 4.10)</h3>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{array}{l}
+\text {Algorithm parameter: a small threshold } \theta>0 \text { determining accuracy of estimation } \\
+\text {Initialize } Q(s, a), \text { for all } (s, a) \in \mathcal{S}^{+} \times \mathcal{A}, \text {arbitrarily except that } Q(\text {terminal}, a)=0 \text{ for all } a \text{ in } \mathcal{A}. \\ 
+\text {Loop: } \\ 
+\qquad \begin{array}{l}
+\Delta \leftarrow 0 \\ 
+\qquad \begin{array}{l}
+\text {Loop for each } (s, a) \in \mathcal{S} \times \mathcal{A}: \\ 
+q \leftarrow Q(s, a) \\ 
+Q(s, a) \leftarrow \sum_{s^{\prime}, r} p\left(s^{\prime}, r \mid s, a\right)\left[r+\gamma \max_{a'} Q\left(s^{\prime}, a'\right)\right] \\
+\end{array}\\
+\end{array}\\
+\text {until } \Delta<\theta \\
+\text {Output a deterministic policy, } \pi \approx \pi_{*}, \text { such that } \pi(s)=\arg \max _{a} Q(s, a).
+\end{array} %]]></script>
+
+<h2 id="45-asychronous-dynamic-programming">4.5 Asychronous dynamic programming</h2>
+
+<p><strong>The structure of updates is more flexible.</strong> DP algorithms are in-place iterative DP algorithms that are not organized in terms of systematic sweeps of the state set.</p>
+
+<ul>
+  <li>These algorithms update the values of states in any order whatsoever, using whatever values of other states happen to be available.</li>
+  <li>The values of some states may be updated several times before the values of others are updated once.</li>
+</ul>
+
+<p><strong>Convergence.</strong> To converge correctly, however, an asynchronous algorithm must continue to update the values of all the states: it can’t ignore any state after some point in the computation.</p>
+
+<p><strong>The exact benefit of being flexible.</strong> Avoiding sweeps does not necessarily mean that we can get away with less computation. It just means that an algorithm does not need to get locked into any hopelessly long sweep before it can make progress improving a policy.</p>
+
+<p>More specificially, asynchronous algorithms also make it easier to intermix computation with real-time interaction. The agent’s experience can be used to determine the states to which the DP algorithm applies its updates. At the same time, the latest value and policy information from the DP algorithm can guide the agent’s decision making.</p>
+
+<p>This makes it possible to <u>focus</u> the DP algorithm’s updates onto parts of the state set that are most relevant to the agent, which is a repeated theme in reinforcement learning.</p>
+
+<h2 id="46-generalize-policy-iteration">4.6 Generalize policy iteration</h2>
+
+<p><strong>What is GPI?</strong> The term generalized policy iteration (GPI) refer to the general idea of letting policy-evaluation and policy evaluation improvement processes interact, independent of the granularity and other details of the two processes.</p>
+
+<p><strong>Characteristics of GPI.</strong> Most importantly, <u>almost all</u> reinforcement learning methods are well described as GPI because they have the follow characteristics:</p>
+
+<ul>
+  <li>They have identiﬁable policies and value functions.</li>
+  <li>The policy is always being improved with respect to the value function.</li>
+  <li>The value function is always being driven toward the value function for the improved policy.</li>
+  <li>The value function stabilizes only when it is consistent with the current policy, and the policy stabilizes only when it is greedy with respect to the current value function - we arrive at the Bellman optimality equation and both the policy and the value function are optimal.</li>
+</ul>
+
+<p><strong>Theoretical value of GPI.</strong> In some cases, GPI can be proved to converge, most notably for the classical DP methods that we have presented in this chapter. In other cases convergence has not been proved, but still the idea of GPI improves our understanding of the methods.</p>
+
+<h2 id="47-efficiency-of-dynamic-programming">4.7 Efficiency of dynamic programming</h2>
+
+<p><strong>Complexity.</strong> Dynamic programming may not be practical for very large problems, but compared with other methods for solving MDPs, DP methods are actually quite efficient. If we ignore a few technical details, then the (worst case) time DP methods take to ﬁnd an optimal policy is <u>polynomial in the number of states and actions</u>.</p>
+
+<p>If n and k denote the number of states and actions, this means that a DP method takes a number of computational operations that is less than some polynomial function of n and k.</p>
+
+<p><strong>The curse of dimensionality (large state sets).</strong> Large state sets do create diffiulties, but these are inherent difficulties of the problem, not of DP as a solution method. In fact, DP is comparatively better suited to handling large state spaces than competing methods such as direct search and linear programming.</p>
+
+<p><strong>Asychronous methods for large state sets.</strong> To complete even one sweep of a synchronous method requires computation and memory for every state. For some problems, even this much memory and computation is impractical, yet the problem is still potentially solvable because relatively few states occur along optimal solution trajectories.</p>
+
+<p>Asynchronous methods and other variations of GPI can be applied in such cases and may ﬁnd good or optimal policies much faster than synchronous methods can.</p>
+
+<p><strong>Policy iteration or value iteration?</strong> In practice, standard DP methods can be used with today’s computers to <u>solve MDPs with millions of states</u>. <u>Both policy iteration and value iteration are widely used</u>, and it is not clear which, if either, is better in general. In practice, these methods usually converge much faster than their theoretical worst-case run times, particularly if they are started with good initial value functions or policies.</p>
+
+
+  </div><a class="u-url" href="/math/2020/07/04/c4-dynamic-programming.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Zhihan&#39;s Deep RL Notes</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Zhihan Yang</li><li><a class="u-email" href="mailto:yangz2@carleton.edu">yangz2@carleton.edu</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://www.twitter.com/jekyllrb"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg> <span class="username">jekyllrb</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>Zhihan&#39;s notes on deep reinforcement learning. For Pytorch implementations, check out https://github.com/zhihanyang2022/deeprl_notes.</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

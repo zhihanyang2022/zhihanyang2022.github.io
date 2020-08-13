@@ -1,0 +1,40 @@
+div.content { 
+	
+	width: 960px;  /* page width */
+  	
+  	margin: auto;
+  	text-align: justify;
+    text-justify: inter-word;
+
+    font-family: "Computer Modern Serif"; /* css is attached in /_layouts/rl_post.html */
+
+}
+
+/* very importance for centering images on posts */
+img {
+  display: block;
+  margin: auto;
+}
+
+/* ========== two images on the same line ========== */
+
+.two-images-container {
+  display: grid;
+  
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  
+  grid-gap: 10px;
+
+  margin: auto;
+  width: 66%;  /* 66% of div.content width */;
+  align-items: center;
+  justify-items: center;
+}
+
+.image-container {
+  width: 300px;
+}
+
+.image {
+  width: 100%;
+}

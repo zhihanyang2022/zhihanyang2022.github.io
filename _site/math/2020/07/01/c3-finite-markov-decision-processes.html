@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.6.0 -->
+<title>Sutton &amp; Barto Chapter 3: Finite Markov Decision Processes | Zhihan’s Deep RL Notes</title>
+<meta name="generator" content="Jekyll v3.8.5" />
+<meta property="og:title" content="Sutton &amp; Barto Chapter 3: Finite Markov Decision Processes" />
+<meta name="author" content="Zhihan Yang" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Zhihan’s notes on deep reinforcement learning. For Pytorch implementations, check out https://github.com/zhihanyang2022/deeprl_notes." />
+<meta property="og:description" content="Zhihan’s notes on deep reinforcement learning. For Pytorch implementations, check out https://github.com/zhihanyang2022/deeprl_notes." />
+<link rel="canonical" href="http://localhost:4000/math/2020/07/01/c3-finite-markov-decision-processes.html" />
+<meta property="og:url" content="http://localhost:4000/math/2020/07/01/c3-finite-markov-decision-processes.html" />
+<meta property="og:site_name" content="Zhihan’s Deep RL Notes" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-07-01T17:00:00-05:00" />
+<script type="application/ld+json">
+{"description":"Zhihan’s notes on deep reinforcement learning. For Pytorch implementations, check out https://github.com/zhihanyang2022/deeprl_notes.","author":{"@type":"Person","name":"Zhihan Yang"},"@type":"BlogPosting","url":"http://localhost:4000/math/2020/07/01/c3-finite-markov-decision-processes.html","headline":"Sutton &amp; Barto Chapter 3: Finite Markov Decision Processes","dateModified":"2020-07-01T17:00:00-05:00","datePublished":"2020-07-01T17:00:00-05:00","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/math/2020/07/01/c3-finite-markov-decision-processes.html"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="Zhihan's Deep RL Notes" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">Zhihan&#39;s Deep RL Notes</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Sutton &amp; Barto Chapter 3: Finite Markov Decision Processes</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2020-07-01T17:00:00-05:00" itemprop="datePublished">Jul 1, 2020
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+
+<ul id="markdown-toc">
+  <li><a href="#31-agent-environment-interface" id="markdown-toc-31-agent-environment-interface">3.1 Agent-environment interface</a></li>
+  <li><a href="#32-goals-and-rewards" id="markdown-toc-32-goals-and-rewards">3.2 Goals and rewards</a></li>
+  <li><a href="#33-returns-and-episodes" id="markdown-toc-33-returns-and-episodes">3.3 Returns and episodes</a></li>
+  <li><a href="#35-policies-and-value-functions" id="markdown-toc-35-policies-and-value-functions">3.5 Policies and value functions</a></li>
+  <li><a href="#36-optimal-policies-and-optimal-value-functions" id="markdown-toc-36-optimal-policies-and-optimal-value-functions">3.6 Optimal policies and optimal value functions</a></li>
+</ul>
+<h2 id="31-agent-environment-interface">3.1 Agent-environment interface</h2>
+
+<p><strong>Dynamics of MDP.</strong> Let <script type="math/tex">p:\mathcal{S} \times \mathcal{R} \times \mathcal{S} \times \mathcal{A} \to \left[0, 1\right]</script> be defined as <script type="math/tex">p(s', r \mid s, a ) = \Pr \left\{ S_t=s', R_t=r \mid S_{t-1} = s, A_{t-1} =a \right\}</script>.</p>
+
+<h2 id="32-goals-and-rewards">3.2 Goals and rewards</h2>
+
+<p><strong>The reward hypothesis.</strong> That all of what we mean by goals and purposes can be well thought of as the maximization of the expected value of the cumulative sum of a received scalar signal (called reward).</p>
+
+<h2 id="33-returns-and-episodes">3.3 Returns and episodes</h2>
+
+<p><strong>Expected return (episodic tasks).</strong> <script type="math/tex">G_t = R_{t+1} + R_{t+2} + \cdots + R_{T}</script></p>
+
+<p><strong>Expected return (continuing tasks).</strong></p>
+
+<p>There are three equivalent expressions:</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{align*}
+G_t &= R_{t+1} + \gamma R_{t+2} + \gamma^2 R_{t+3} + \cdots = \sum_{k=0}^{\infty} \gamma^{k}R_{t+k+1} = R_{t+1} + \gamma G_{t+1}
+\end{align*} %]]></script>
+
+<p>If the reward received at each time-step is just one, then <script type="math/tex">G_t = \sum_{k=0}^{\infty}\gamma^k = \frac{1}{1 - \gamma}</script>.</p>
+
+<h2 id="35-policies-and-value-functions">3.5 Policies and value functions</h2>
+
+<p><strong>Policy.</strong> A function that maps from <script type="math/tex">\mathcal{S} \times \mathcal{A}</script> to <script type="math/tex">\left[0, 1\right]</script> and is denoted by <script type="math/tex">\pi</script>.</p>
+
+<p><strong>State-value function.</strong> The state-value function of a policy (denoted by <script type="math/tex">v_{\pi}</script>) maps each <u>state</u> to the expected return of starting in that state and following <script type="math/tex">\pi</script>.</p>
+
+<script type="math/tex; mode=display">\begin{align*}
+v_{\pi}(s) = \mathbb{E}_{\pi} \left[ G_t | S_t=s\right]
+\end{align*}</script>
+
+<p><strong>Action-value function.</strong> The action-value function of a policy (denoted by <script type="math/tex">q_{\pi}</script> maps each <u>state-action pair</u> to the expected return of starting in that state, taking that action and then following <script type="math/tex">\pi</script>.</p>
+
+<script type="math/tex; mode=display">\begin{align*}
+q_{\pi}(s, a) = \mathbb{E}_{\pi} \left[ G_t | S_t=s, A_t = a \right]
+\end{align*}</script>
+
+<p><strong>Recursive definitions of <script type="math/tex">v_{\pi}</script> and <script type="math/tex">q_{\pi}</script> in terms of <script type="math/tex">v_{\pi}</script> and <script type="math/tex">q_{\pi}</script>.</strong> Discrete state, action and reward spaces are assumed for convenience. I’ve also included the cases of where <script type="math/tex">\pi</script> is the optimal policy; in those cases, <script type="math/tex">\pi</script> is replace with <script type="math/tex">\ast</script>.</p>
+
+<hr />
+
+<p>TODO: mention the definition of the probability functions pi and 4-argument p</p>
+
+<p>Express <script type="math/tex">v_{\pi}(s)</script> in terms of <script type="math/tex">q_{\pi}(s, a)</script>:</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{align*}
+v_{\pi}(s) &= \mathbb{E}_{a \sim \pi(s)} \left[ q_{\pi}(S_t, A_t) \mid S_t = s\right] \\
+&= \sum_{a \in \mathcal{A}} \pi(a \mid s) q_{\pi}(s, a)
+\end{align*} %]]></script>
+
+<p>Comment: <script type="math/tex">a \sim \pi(s)</script> means the value of $A_t$ (denoted by $a$ by definition of <script type="math/tex">\pi</script>) is drawn from a distribution specified by the value of <script type="math/tex">S_t</script> (denoted by <script type="math/tex">s</script> by definition of <script type="math/tex">\pi</script>). In other words, each <script type="math/tex">a</script> is associated with a probability. This probability is necessary because <script type="math/tex">A_t</script> is the only random variable inside the brackets (<script type="math/tex">S_t</script> is used as a condition), and we need to know <script type="math/tex">p(a \mid s)</script> (which is <script type="math/tex">\pi(a \mid s)</script>).</p>
+
+<p>Express <script type="math/tex">v_{\ast}(s)</script> in terms of <script type="math/tex">q_{\ast}(s, a)</script>:</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{align*}
+v_{\ast}(s) &= \max_{a \in \mathcal{A}} q_{\pi}(s, a) \\
+\end{align*} %]]></script>
+
+<hr />
+
+<p>Express <script type="math/tex">q_{\pi}(s, a)</script> in terms of <script type="math/tex">v_{\pi}(s)</script>:</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{align*}
+q_{\pi}(s, a) &= \mathbb{E}_{(s', r) \sim p(s', r|s, a)} \left[ R_{t+1} + \gamma v_{\pi}(S_{t+1}) \mid S_{t}=s,A_{t}=a\right] \\
+&= \sum_{s'\in \mathcal{S}, r \in \mathcal{R}} p(s’, r \mid s, a) \left[ r + \gamma v_{\pi}(s') \right]
+\end{align*} %]]></script>
+
+<p>Express <script type="math/tex">q_{\ast}(s, a)</script> in terms of <script type="math/tex">v_{\ast}(s)</script>:</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{align*}
+q_{\ast}(s, a) &= \mathbb{E}_{(s', r) \sim p(s', r|s, a)} \left[ R_{t+1} + \gamma v_{\ast}(S_{t+1}) \mid  S_{t}=s, A_{t}=a\right] \\
+&= \sum_{s'\in \mathcal{S}, r \in \mathcal{R}} p(s’, r \mid s, a) \left[ r + \gamma v_{\ast}(s') \right]
+\end{align*} %]]></script>
+
+<hr />
+
+<p>By nesting the two identities above, we can easily demonstrate the following two identities.</p>
+
+<hr />
+
+<p>Express <script type="math/tex">v_{\pi}(s)</script> in terms of <script type="math/tex">v_{\pi}(s)</script>:</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{align*}
+v_{\pi}(s) &= \mathbb{E}_{a \sim \pi(s)} \left[ q_{\pi}(S_t, A_t) \mid S_t=t\right] \\
+&= \mathbb{E}_{a \sim \pi(s)} \left[ \mathbb{E}_{(s', r) \sim p(s', r|s, a)} \left[ R_{t+1} + \gamma v_{\pi}(S_{t+1}) \mid A_t=a\right] \mid S_t = t\right]\\
+&= \sum_{a \in \mathcal{A}(s)} \pi(a \mid s) \sum_{s’ \in \mathcal{S}, r \in \mathcal{R}} p(s’, r \mid s, a)\left[ r + \gamma v_{\pi}(s’) \right]
+\end{align*} %]]></script>
+
+<p>Express  <script type="math/tex">v_{\ast}(s)</script> in terms of  <script type="math/tex">v_{\ast}(s)</script>:</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{align*}
+v_{\ast}(s) &= \max_{a \in \mathcal{A}} q_{\ast}(s, a) \\
+&= \max_{a \in \mathcal{A}} \mathbb{E}_{(s', r) \sim p(s', r|s, a)} \left[ R_{t+1} + \gamma v_{\ast}(S_{t+1}) \mid S_t=s, A_t=a\right]\\
+&= \max_{a \in \mathcal{A}} \sum_{s’ \in \mathcal{S}, r \in \mathcal{R}} p(s’, r \mid s, a)\left[ r + \gamma v_{\ast}(s’) \right]
+\end{align*} %]]></script>
+
+<hr />
+
+<p>Express <script type="math/tex">q_{\pi}(s, a)</script> in terms of <script type="math/tex">q_{\pi}(s, a)</script>:</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{align*}
+q_{\pi}(s, a) &= \mathbb{E}_{(s', r) \sim p(s', r|s, a)} \left[ R_{t+1} + \gamma v_{\pi}(S_{t+1}) \mid S_t=s, A_t=a\right] \\
+&= \mathbb{E}_{(s', r) \sim p(s', r|s, a)} \left[ R_{t+1} + \gamma \mathbb{E}_{a' \sim \pi(s')} \left[ q_{\pi}(S_{t+1},  A_{t+1}) \mid S_{t+1}=s'\right] \mid S_t=s, A_t=a \right] \\
+&= \sum_{s'\in \mathcal{S}, r \in \mathcal{R}} p(s’, r \mid s, a) \left[ r + \gamma \sum_{a' \in \mathcal{A}} \pi(a' \mid s') q_{\pi}(s', a') \right]
+\end{align*} %]]></script>
+
+<p>Express <script type="math/tex">q_{\ast}(s, a)</script> in terms of <script type="math/tex">q_{\ast}(s, a)</script>:</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{align*}
+q_{\ast}(s, a) &= \mathbb{E}_{(s', r) \sim p(s', r|s, a)} \left[ R_{t+1} + \gamma v_{\ast}(S_{t+1}) \mid S_t=s, A_t=a\right] \\
+&= \mathbb{E}_{(s', r) \sim p(s', r|s, a)} \left[ R_{t+1} + \gamma \max_{a' \in \mathcal{A}} q_{\pi}(S_{t+1}, A_{t+1}) \mid S_t=s, A_t=a \right] \\
+&= \sum_{s'\in \mathcal{S}, r \in \mathcal{R}} p(s’, r \mid s, a) \left[ r + \gamma \max_{a' \in \mathcal{A}} q_{\pi}(s', a') \right]
+\end{align*} %]]></script>
+
+<hr />
+
+<p>All the identities above will prove to be very useful in understanding the motivation of deep RL algorithms.</p>
+
+<h2 id="36-optimal-policies-and-optimal-value-functions">3.6 Optimal policies and optimal value functions</h2>
+
+<p><strong>Optimal state-value function.</strong> <script type="math/tex">v_{\ast}(s)=\max_{\pi} v_{\pi}(s)</script> for all <script type="math/tex">s \in \mathcal{S}</script>.</p>
+
+<p><strong>Optimal action-value function.</strong> <script type="math/tex">q_{\ast}(s, a) = \max_{\pi} q_{\pi}(s, a)</script> for all <script type="math/tex">s \in \mathcal{S}</script> and <script type="math/tex">a \in \mathcal{A}</script>.</p>
+
+<p><strong>Recusive definitions of <script type="math/tex">v_{\ast}(s)</script> and <script type="math/tex">q_{\ast}(s, a)</script> in terms of <script type="math/tex">v_{\ast}(s)</script> and <script type="math/tex">q_{\ast}(s, a)</script>.</strong> Shown in the previous section for convenience.</p>
+
+
+  </div><a class="u-url" href="/math/2020/07/01/c3-finite-markov-decision-processes.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Zhihan&#39;s Deep RL Notes</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Zhihan Yang</li><li><a class="u-email" href="mailto:yangz2@carleton.edu">yangz2@carleton.edu</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://www.twitter.com/jekyllrb"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg> <span class="username">jekyllrb</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>Zhihan&#39;s notes on deep reinforcement learning. For Pytorch implementations, check out https://github.com/zhihanyang2022/deeprl_notes.</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.6.0 -->
+<title>Sutton &amp; Barto Chapter 5: Monte Carlo Methods | Zhihan’s Deep RL Notes</title>
+<meta name="generator" content="Jekyll v3.8.5" />
+<meta property="og:title" content="Sutton &amp; Barto Chapter 5: Monte Carlo Methods" />
+<meta name="author" content="Zhihan Yang" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Zhihan’s notes on deep reinforcement learning. For Pytorch implementations, check out https://github.com/zhihanyang2022/deeprl_notes." />
+<meta property="og:description" content="Zhihan’s notes on deep reinforcement learning. For Pytorch implementations, check out https://github.com/zhihanyang2022/deeprl_notes." />
+<link rel="canonical" href="http://localhost:4000/math/2020/07/10/c5-monte-carlo-methods.html" />
+<meta property="og:url" content="http://localhost:4000/math/2020/07/10/c5-monte-carlo-methods.html" />
+<meta property="og:site_name" content="Zhihan’s Deep RL Notes" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-07-10T10:30:00-05:00" />
+<script type="application/ld+json">
+{"description":"Zhihan’s notes on deep reinforcement learning. For Pytorch implementations, check out https://github.com/zhihanyang2022/deeprl_notes.","author":{"@type":"Person","name":"Zhihan Yang"},"@type":"BlogPosting","url":"http://localhost:4000/math/2020/07/10/c5-monte-carlo-methods.html","headline":"Sutton &amp; Barto Chapter 5: Monte Carlo Methods","dateModified":"2020-07-10T10:30:00-05:00","datePublished":"2020-07-10T10:30:00-05:00","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/math/2020/07/10/c5-monte-carlo-methods.html"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="Zhihan's Deep RL Notes" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">Zhihan&#39;s Deep RL Notes</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Sutton &amp; Barto Chapter 5: Monte Carlo Methods</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2020-07-10T10:30:00-05:00" itemprop="datePublished">Jul 10, 2020
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+
+<ul id="markdown-toc">
+  <li><a href="#off-policy-prediction-via-importance-sampling" id="markdown-toc-off-policy-prediction-via-importance-sampling">Off-policy Prediction via Importance Sampling</a></li>
+  <li><a href="#incremental-implementation" id="markdown-toc-incremental-implementation">Incremental implementation</a>    <ul>
+      <li><a href="#weighted-importance-sampling" id="markdown-toc-weighted-importance-sampling">Weighted importance sampling</a>        <ul>
+          <li><a href="#state-value-function-off-policy-monte-carlo-prediction" id="markdown-toc-state-value-function-off-policy-monte-carlo-prediction">State-value function (off-policy Monte Carlo prediction)</a></li>
+          <li><a href="#action-value-function-off-policy-monte-carlo-control" id="markdown-toc-action-value-function-off-policy-monte-carlo-control">Action-value function (off-policy Monte Carlo control)</a></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+<h2 id="off-policy-prediction-via-importance-sampling">Off-policy Prediction via Importance Sampling</h2>
+
+<h2 id="incremental-implementation">Incremental implementation</h2>
+
+<h3 id="weighted-importance-sampling">Weighted importance sampling</h3>
+
+<h4 id="state-value-function-off-policy-monte-carlo-prediction">State-value function (off-policy Monte Carlo prediction)</h4>
+
+<p>Suppose <script type="math/tex">G_1, G_2, \cdots, G_{n-1}</script> are a sequence of returns starting in the same state <script type="math/tex">S</script>. Each <script type="math/tex">G_i</script> is associated with a random weight <script type="math/tex">W_i</script>. The weighted importance sampling method states that the estimate of <script type="math/tex">v(s)</script> is given by:
+<script type="math/tex">\begin{align*}
+V_n(s) = \frac{\sum_{k=1}^{n-1} W_k G_k}{\sum_{k=1}^{n-1}G_k}
+\end{align*}</script>
+where <script type="math/tex">V_n(s)</script> is the <script type="math/tex">n</script>-th estimate of <script type="math/tex">v(s)</script> that depends on the first <script type="math/tex">n-1</script> returns and weights because <script type="math/tex">V_1(s)</script> is set to be arbitrary and depends on no experiences with the environment. Since <script type="math/tex">V_n(s)</script> has to depend on at least one return and one weight, <script type="math/tex">n \geq 2</script> so that <script type="math/tex">n-1 \geq 1</script>.</p>
+
+<p>However, if we use the update rule above, then whenever we calculate <script type="math/tex">V_{n+1}(s)</script>, we need access to <script type="math/tex">n</script> returns and weights, which can take up large amounts of memory when the state space <script type="math/tex">\mathcal{S}</script> is large. Therefore, we are interested in an iterative update rule, where <script type="math/tex">V_{n+1}</script> can be determined using <script type="math/tex">V_n(s)</script>. <strong>Solution to exercise 5.10.</strong>
+<script type="math/tex">% <![CDATA[
+\begin{align*}
+V_{n+1} &= \frac{1}{\sum_{k=1}^nW_k} \sum_{k=1}^n W_k G_k\\
+&= \frac{1}{\sum_{k=1}^nW_k}  \left( W_n G_n + \sum_{k=1}^{n-1} W_k G_k \right) \\
+&= \frac{1}{\sum_{k=1}^nW_k} \left( W_n G_n + \left( \sum_{k=1}^{n}W_k - W_n \right) \left( \frac{1}{ \sum_{k=1}^{n}W_k - W_n} \right) \left(\sum_{k=1}^{n-1} W_k G_k \right) \right) \\
+&= \frac{1}{\sum_{k=1}^nW_k} \left( W_n G_n + \left( \sum_{k=1}^{n}W_k - W_n \right)V_n \right) \\
+&= \frac{1}{\sum_{k=1}^nW_k} \left( W_n G_n + V_n\sum_{k=1}^{n}W_k - V_nW_n \right) \\
+&= V_n + \frac{W_n}{\sum_{k=1}^nW_k} \left( G_n - V_n\right)
+\end{align*} %]]></script>
+At this point, we have found an expression of <script type="math/tex">V_{n+1}</script> in terms of <script type="math/tex">V_n</script>, but the sum <script type="math/tex">\sum_{k=1}^n W_k</script> still requires the memory of <script type="math/tex">n</script> <script type="math/tex">W_k</script>’s. Therefore, we can let <script type="math/tex">C_{n-1} = \sum_{k=1}^{n-1} W_k</script> and then <script type="math/tex">C_n = \sum_{k=1}^{n} W_k = W_n + \sum_{k=1}^{n-1} W_k = W_n + C_{n-1}</script>.</p>
+
+<p>**Note. ** <script type="math/tex">V_n</script>: weighted average of <script type="math/tex">n - 1</script> returns. <script type="math/tex">C_n</script>: sum of <script type="math/tex">n</script> weights. Both of them use the same subcript but they each denote a different number of terms. I think <script type="math/tex">C_n</script> is used this way so that everything in the update rule has the same subscript. For example,</p>
+
+<p>For a state <script type="math/tex">S</script>, initialize <script type="math/tex">V_1(S)</script> as arbitrary and <script type="math/tex">C_0(S)=0</script>.</p>
+
+<ul>
+  <li>Collect a return starting from <script type="math/tex">S</script> and a weight</li>
+  <li>
+    <script type="math/tex; mode=display">C_1 = W_1 + C_0</script>
+  </li>
+  <li><script type="math/tex">V_2 = V_1 + \frac{W_1}{C_1} (G_1 - V_1)</script> (the update rule)</li>
+</ul>
+
+<p><strong>Conclusion.</strong> Now organize the results of this derivation as the following algorithm.</p>
+
+<p><img src="https://i.loli.net/2020/07/11/eptx6IswSFAPcCg.png" /></p>
+
+<h4 id="action-value-function-off-policy-monte-carlo-control">Action-value function (off-policy Monte Carlo control)</h4>
+
+
+  </div><a class="u-url" href="/math/2020/07/10/c5-monte-carlo-methods.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Zhihan&#39;s Deep RL Notes</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Zhihan Yang</li><li><a class="u-email" href="mailto:yangz2@carleton.edu">yangz2@carleton.edu</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://www.twitter.com/jekyllrb"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg> <span class="username">jekyllrb</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>Zhihan&#39;s notes on deep reinforcement learning. For Pytorch implementations, check out https://github.com/zhihanyang2022/deeprl_notes.</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

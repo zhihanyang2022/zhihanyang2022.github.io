@@ -1,8 +1,8 @@
 ---
-layout: post
+layout: rl_post
 title:  "Policy Iteration in Practice"
 date:   2020-07-21 11:30:00 -0500
-categories: math
+permalink: /rl/policy_iteration_in_practice
 ---
 
 <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
@@ -197,7 +197,7 @@ algo = PolicyIteration(
 )
 ```
 
-<img src="https://i.loli.net/2020/07/23/OX7LfYAsQFqES9J.png">
+<img src="https://i.loli.net/2020/07/23/OX7LfYAsQFqES9J.png" width="500">
 
 **Book’s first approach: epsilon-greedy policy**
 
@@ -232,9 +232,9 @@ algo = PolicyIteration(
 )
 ```
 
-<img src="https://i.loli.net/2020/07/23/ROTDc34wMe6ZAhG.png">
+<img src="https://i.loli.net/2020/07/23/ROTDc34wMe6ZAhG.png" width="500">
 
 Here’s a more sophicated environment with walls and traps (large negative rewards of -5):
 
-<img src="https://i.loli.net/2020/07/23/almtEWnvpL3Frgh.png">
+<img src="https://i.loli.net/2020/07/23/almtEWnvpL3Frgh.png" width="500">
 
