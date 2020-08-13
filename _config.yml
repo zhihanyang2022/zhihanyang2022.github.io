@@ -18,8 +18,7 @@ author: Zhihan Yang
 email: yangz2@carleton.edu
 description: >- # this means to ignore newlines until "baseurl:"
   Zhihan's notes on deep reinforcement learning. For Pytorch implementations, check out https://github.com/zhihanyang2022/deeprl_notes.
-# baseurl: "deeprl_notes_site" # the subpath of your site, e.g. /blog
-baseurl: ""
+baseurl: "deeprl_notes_site" # the subpath of your site, e.g. /blog
 url: "" # the base hostname & protocol for your site, e.g. http://example.com
 twitter_username: jekyllrb
 
