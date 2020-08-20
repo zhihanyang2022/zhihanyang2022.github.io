@@ -9,8 +9,7 @@
 	<div class="content">
 		<p><a href="/rl">Back</a> to the list of RL posts.</a>
 		<h1>SARSA vs. Q-Learning</h1>
-		<p>By Zhihan on 2020-07-25 18:00:00 -0500.</p>
-		<p>Please note that this webpage does not scale well on mobile devices.</p>
+		<p>Started by Zhihan on 2020-07-25 18:00:00 -0500.</p>
 		<script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
 
 <ul id="markdown-toc">
@@ -160,7 +159,9 @@ Loop for each episode:
 
 <p>Other than traps, stepping into a square incurs a reward of -1.</p>
 
-<p><img src="https://i.loli.net/2020/07/28/rvEBFeyNJ7onCKp.png" width="600" /></p>
+<div style="max-width:600px; margin: auto">
+  <img src="https://i.loli.net/2020/07/28/rvEBFeyNJ7onCKp.png" style="max-width:100%" />
+</div>
 
 <h3 id="online-performance">Online performance</h3>
 
@@ -174,7 +175,9 @@ Loop for each episode:
 
 <p>Now, let’s try to understand the intuition behind these observations.</p>
 
-<p><img src="https://i.loli.net/2020/07/28/FfkQOgyP2HT6KCL.png" width="800" /></p>
+<div style="max-width:800px; margin: auto">
+  <img src="https://i.loli.net/2020/07/28/FfkQOgyP2HT6KCL.png" style="max-width:100%" />
+</div>
 
 <h3 id="in-depth-explanation-of-online-performance">In-depth explanation of online performance</h3>
 
@@ -189,13 +192,17 @@ Loop for each episode:
   <li>Red: grids at which the learned greedy policy behaves sub-optimally (with respect to a policy-iteration baseline)</li>
 </ul>
 
-<p><img src="https://i.loli.net/2020/07/29/yquiQ4wVZN6HvoX.jpg" width="600" /></p>
+<div style="max-width:600px; margin: auto">
+  <img src="https://i.loli.net/2020/07/29/yquiQ4wVZN6HvoX.jpg" style="max-width:100%" />
+</div>
 
 <p>On the other hand, SARSA takes this randomness into account because it learns the value of the behavior policy. Therefore, it uses extra 2 actions, one at the beginning of trajectory and another at the end, to exchange for a safer path.</p>
 
 <p>Figure 2. The greedy trajectory learned by SARSA.</p>
 
-<p><img src="https://i.loli.net/2020/07/29/3D8es7hqgyMBSC2.jpg" width="600" /></p>
+<div style="max-width:600px; margin: auto">
+  <img src="https://i.loli.net/2020/07/29/3D8es7hqgyMBSC2.jpg" style="max-width:100%" />
+</div>
 
 <p>Explanations:</p>
 
@@ -227,11 +234,15 @@ Loop for each episode:
 
 <p>Figure 3: Number of evaluations for each state after running 10000 episodes of Q-learning.</p>
 
-<p><img src="https://i.loli.net/2020/07/28/dfqrea8DpKCjF5T.jpg" width="600" /></p>
+<div style="max-width:600px; margin: auto">
+  <img src="https://i.loli.net/2020/07/28/dfqrea8DpKCjF5T.jpg" style="max-width:100%" />
+</div>
 
 <p>Figure 4: Number of evaluations for each state after running 10000 episodes of SARSA.</p>
 
-<p><img src="https://i.loli.net/2020/07/28/81ghSFAaejqCvXc.jpg" width="600" /></p>
+<div style="max-width:600px; margin: auto">
+  <img src="https://i.loli.net/2020/07/28/81ghSFAaejqCvXc.jpg" style="max-width:100%" />
+</div>
 
 
 		<p><a href="/rl">Back</a> to the list of RL posts.</a>

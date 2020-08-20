@@ -1,18 +1,40 @@
 div.content { 
 	
-	width: 960px;  /* page width */
-  	
+	max-width: 900px;  /* adaptable page width */
+
   	margin: auto;
+  	
   	text-align: justify;
-    text-justify: inter-word;
+    text-justify: inter-character;
 
     font-family: "Computer Modern Serif"; /* css is attached in /_layouts/rl_post.html */
 
 }
 
-/* very importance for centering images on posts */
+/* for code wrapping */
+/* https://www.tutorialspoint.com/How-do-I-wrap-text-in-a-pre-tag-in-HTML#:~:text=HTML%20tag%20defines%20preformatted,we%20need%20to%20use%20CSS. */
+
+pre {
+    overflow-x: auto;
+    white-space: pre-wrap;
+    white-space: -moz-pre-wrap;
+    white-space: -pre-wrap;
+    white-space: -o-pre-wrap;
+    word-wrap: break-word;
+ }
+
+.caption {
+  text-align: center; 
+  /*text-justify: inter-word;*/
+}
+
+p, li {
+	font-size:17.5;
+}
+
+/* both attributes are essential for centering images on posts */
 img {
-  display: block;
+  display: block; 
   margin: auto;
 }
 
@@ -21,18 +43,18 @@ img {
 .two-images-container {
   display: grid;
   
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
   
   grid-gap: 10px;
 
   margin: auto;
-  width: 66%;  /* 66% of div.content width */;
+  width: 80%;  /* 66% of div.content width */;
   align-items: center;
   justify-items: center;
 }
 
 .image-container {
-  width: 300px;
+  width: 350px;
 }
 
 .image {

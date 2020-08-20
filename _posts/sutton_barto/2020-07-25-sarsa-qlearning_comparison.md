@@ -128,7 +128,9 @@ One way to understand the practical differences between SARSA and Q-learning is 
 
 Other than traps, stepping into a square incurs a reward of -1.
 
-<img src='https://i.loli.net/2020/07/28/rvEBFeyNJ7onCKp.png' width="600">
+<div style="max-width:600px; margin: auto">
+  <img src='https://i.loli.net/2020/07/28/rvEBFeyNJ7onCKp.png' style="max-width:100%">
+</div>
 
 ### Online performance
 
@@ -140,7 +142,9 @@ Online performance is the performance of the behavior policy. Here are some impo
 
 Now, let’s try to understand the intuition behind these observations.
 
-<img src="https://i.loli.net/2020/07/28/FfkQOgyP2HT6KCL.png" width="800">
+<div style="max-width:800px; margin: auto">
+  <img src="https://i.loli.net/2020/07/28/FfkQOgyP2HT6KCL.png" style="max-width:100%">
+</div>
 
 ### In-depth explanation of online performance
 
@@ -153,13 +157,17 @@ Legend:
 - Orange: grids that are on the learned greedy trajectory
 - Red: grids at which the learned greedy policy behaves sub-optimally (with respect to a policy-iteration baseline)
 
-<img src='https://i.loli.net/2020/07/29/yquiQ4wVZN6HvoX.jpg' width="600">
+<div style="max-width:600px; margin: auto">
+  <img src='https://i.loli.net/2020/07/29/yquiQ4wVZN6HvoX.jpg' style="max-width:100%">
+</div>
 
 On the other hand, SARSA takes this randomness into account because it learns the value of the behavior policy. Therefore, it uses extra 2 actions, one at the beginning of trajectory and another at the end, to exchange for a safer path.
 
 Figure 2. The greedy trajectory learned by SARSA.
 
-<img src='https://i.loli.net/2020/07/29/3D8es7hqgyMBSC2.jpg' width="600">
+<div style="max-width:600px; margin: auto">
+  <img src='https://i.loli.net/2020/07/29/3D8es7hqgyMBSC2.jpg' style="max-width:100%">
+</div>
 
 Explanations:
 
@@ -180,9 +188,14 @@ Explanations:
 
 Figure 3: Number of evaluations for each state after running 10000 episodes of Q-learning. 
 
-<img src='https://i.loli.net/2020/07/28/dfqrea8DpKCjF5T.jpg' width="600">
+<div style="max-width:600px; margin: auto">
+  <img src='https://i.loli.net/2020/07/28/dfqrea8DpKCjF5T.jpg' style="max-width:100%">
+</div>
+
 
 Figure 4: Number of evaluations for each state after running 10000 episodes of SARSA.
 
-<img src='https://i.loli.net/2020/07/28/81ghSFAaejqCvXc.jpg' width="600">
+<div style="max-width:600px; margin: auto">
+  <img src='https://i.loli.net/2020/07/28/81ghSFAaejqCvXc.jpg' style="max-width:100%">
+</div>
 
