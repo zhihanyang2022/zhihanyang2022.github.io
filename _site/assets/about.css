@@ -1,0 +1,12 @@
+div.content { 
+	
+	max-width: 600px;  /* adaptable page width */
+
+  	margin: auto;
+  	
+  	text-align: justify;
+    text-justify: inter-character;
+
+    font-family: 'Titillium Web', Verdana, Helvetica, sans-serif;
+
+}

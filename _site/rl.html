@@ -2,6 +2,9 @@
 <html>
 <head>
 <link rel="stylesheet" type="text/css" href="https://cdn.rawgit.com/dreampulse/computer-modern-web-font/master/fonts.css">
+<link rel="stylesheet" type="text/css" href="/assets/navbar.css">
+<link href='https://fonts.googleapis.com/css?family=Titillium Web' rel='stylesheet'>
+
 <style>
 .grid-container {
   display: grid;
@@ -24,22 +27,36 @@
   padding: 10px;
   font-size: 15px;
   text-align: center;
+  height: 300px;
   width: 225px;
 }
 
 .grid-image {
-  width: 100%;
+  max-height: 60%;
+  max-width: 100%;
 }
 
 p, h1, h2, h3 {
-  font-family: "Computer Modern Serif";
+  /*font-family: "Computer Modern Serif";*/
+  font-family: 'Titillium Web', Verdana, Helvetica, sans-serif;
 }
+
 </style>
 </head>
-<body>
+<body style="background-color:lightpink;">
 
-<h1 align='center'>Introduction to Reinforcement Learning</h1>
-<p align='center'>Here's my notes, implementation and experiments with some classical and deep RL algorithms.</p>
+<!-- navigation bar -->
+
+<ul class='nav'>
+  <li>Zhihan's Site</li>
+  <li>|</li>
+  <li><a href="#">ML Notes</a></li>
+  <li><a href="/rl"><u>RL Notes</u></a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+<h1 align='center'>Notes for Sutton & Barto Book (2018)</h1>
+<p align='center'>Here's my notes, implementation and experiments on some classical and deep RL algorithms mentioned in the book.</p>
 
 <!-- ============================== -->
 
@@ -84,6 +101,12 @@ p, h1, h2, h3 {
     <img src='https://i.loli.net/2020/08/12/wUje1WShKVT8csl.png' class="grid-image">
     <h3><a href='/rl/dynaq'>Dyna-Q</a></h3>
     <p>An introduction to planning build on top of Q-learning.</p>
+  </div>
+
+  <div class="grid-item">
+    <img src='https://i.loli.net/2020/08/25/bornMOFQjDLlUAC.png' class="grid-image">
+    <h3><a href='/2020-08-24-prioritized-sweeping.html'>Prioritized Sweeping</a></h3>
+    <p>An interactive animation using p5.js on efficiency-improved Dyna-Q.</p>
   </div>
 
 </div>

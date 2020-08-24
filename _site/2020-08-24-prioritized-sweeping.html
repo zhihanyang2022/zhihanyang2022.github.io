@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="">
+
+<head>
+  <link href='https://fonts.googleapis.com/css?family=Titillium Web' rel='stylesheet'>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>p5.js example</title>
+  <style>
+    div.content {
+      max-width: 700px;
+      margin: auto;
+      text-align: justify;
+      text-justify: inter-character;;
+    }
+    h1, h2, p, li {
+      font-family: 'Titillium Web', Verdana, Helvetica, sans-serif;
+    }
+  </style>
+  <script src="/assets/p5.js"></script>
+  <script src="/assets/addons/p5.sound.min.js"></script>
+  <script src="/sketch.js"></script>
+</head>
+
+<body>
+  
+  <div class='content'>
+  
+  <h1 align='center'>Prioritized Sweeping (For Two Episodes)</h1>
+  <p align='center'>An interactive animation using p5.js</p>
+  <p align='center'>By Zhihan Yang on August 24th 2020</p>
+  
+  <h2>Environment description</h2> 
+  <p>State (0, 0) is the starting state; state (9, 9) is the terminal state. For each position tuple, its first integer is the row index and its second integer is the column index. All transitions yield a reward of zero except those leading into the terminal state, which yield a value of one.</p> 
+  
+  <h2>Legend</h2>
+  <ul>
+    <li>Left diagram:</li>
+    <ul>
+      <li>White squares: states</li>
+      <li>Black arrows: argmax actions</li>
+      <li>Colorful triangles: action values</li>
+      <li>Numbers on colorful triangles: action values</li>
+      <li>Red highlight: current state-action pair (selected by either learning or planning</li>
+      <li>Green highlight: next state and its argmax action</li>
+      <li>Slider: a tool you can use to scroll through all the updates (learning and planning)</li>
+    </ul>
+    <li>Right diagram:</li>
+    <ul>
+      <li>Colorful triangles: priority values (TD errors)</li>
+    </ul>
+  </ul>
+
+  </div>
+
+  <hr>
+  <br>
+  
+  <div id="sketch-holder" align='center'>
+      <!-- Our sketch will go here! -->
+  </div>
+</body>
+
+</html>
