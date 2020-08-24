@@ -1,7 +1,7 @@
 var num_cols = 10;
 var num_rows = 10;
-var outer_width = 70;
-var inner_width = 70;
+var outer_width = 60;
+var inner_width = 60;
 var timestep = 0;
 
 let colors;
@@ -28,7 +28,7 @@ function preload() {
 
 function setup() {
 	// https://github.com/processing/p5.js/wiki/Positioning-your-canvas#relocating-the-canvas
-	var canvas = createCanvas(num_cols * outer_width * 2.1, num_rows * outer_width + 100);
+	var canvas = createCanvas(num_cols * outer_width * 2.03, num_rows * outer_width + 100);
 	canvas.parent('sketch-holder');
 
 	// https://p5js.org/reference/#/p5/createSlider
@@ -54,7 +54,7 @@ function draw() {
 	for (var i = 0; i < num_cols; i++) {
 	  for (var j = 0; j < num_rows; j++) {
 
-	  	x = i * outer_width + num_rows * outer_width * 1.1;
+	  	x = i * outer_width + num_rows * outer_width * 1.03;
 	    y = j * outer_width;
 
 	    var leftX = x;
@@ -219,7 +219,7 @@ function draw() {
 	       	fill(255);
 	       	noStroke(0);
 	        textAlign(CENTER);
-	        textSize(10);
+	        textSize(8);
 	        text(round(values[l], 2), centerX, centerY-state_width/2-10);
 
 	      } else if (l == 1) {
@@ -234,7 +234,7 @@ function draw() {
 	       	fill(255);
 	       	noStroke(0);
 	        textAlign(CENTER);
-	        textSize(10);
+	        textSize(8);
 	        text(round(values[l], 2), centerX+state_width/2+12.5, centerY);
 	      
 	      } else if (l == 2) {
@@ -249,7 +249,7 @@ function draw() {
 	        fill(255);
 	        noStroke(0);
 	        textAlign(CENTER);
-	        textSize(10);
+	        textSize(8);
 	        text(round(values[l], 2), centerX, centerY+state_width/2+15);
 	      
 	      } else if (l == 3) {
@@ -265,7 +265,7 @@ function draw() {
 	        fill(255);
 	        noStroke(0);
 	        textAlign(CENTER);
-	        textSize(10);
+	        textSize(8);
 	        text(round(values[l], 2), centerX-state_width/2-12, centerY);
 	      
 	      }
@@ -348,12 +348,12 @@ function draw() {
 	    fill(0);
 	    noStroke();
 		textSize(12);
-		text('Timestep: ' + str(slider.value()), 350, num_rows * outer_width + 1.5 * outer_width, 300, 100);
+		text('Timestep: ' + str(slider.value()), 300, num_rows * outer_width + 1.5 * outer_width + 20, 300, 100);
 
 		if (q_statuses[timestep] == 0) {
-			text('Update step type: Learning', 350, num_rows * outer_width + 1.5 * outer_width + 20, 400, 100);
+			text('Update step type: Learning', 300, num_rows * outer_width + 1.5 * outer_width + 40, 400, 100);
 		} else {
-			text('Update step type: Planning', 350, num_rows * outer_width + 1.5 * outer_width + 20, 400, 100);
+			text('Update step type: Planning', 300, num_rows * outer_width + 1.5 * outer_width + 40, 400, 100);
 		}
 
 	  }
