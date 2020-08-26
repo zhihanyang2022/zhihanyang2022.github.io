@@ -38,7 +38,6 @@ function setup() {
 	// https://p5js.org/reference/#/p5/createSlider
 	slider = createSlider(0, Object.keys(qs).length-1, 0, 1);  // https://stackoverflow.com/questions/5223/length-of-a-javascript-object
 	slider.style('width', '500px');
-	slider.position(0, 0, 'relative');
 }
 
 function draw() {
