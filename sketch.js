@@ -28,13 +28,17 @@ function preload() {
 
 function setup() {
 	// https://github.com/processing/p5.js/wiki/Positioning-your-canvas#relocating-the-canvas
-	var canvas = createCanvas(num_cols * outer_width * 2.03, num_rows * outer_width + 100);
-	canvas.parent('sketch-holder');
+	var cnv = createCanvas(num_cols * outer_width * 2.03, num_rows * outer_width + 100);
+	// let canvas = createCanvas(windowHeight, windowWidth);
+	cnv.style('display', 'block');
+	// cnv.position(150, 150);
+	// canvas.position();
+	cnv.parent('sketch-holder');
 
 	// https://p5js.org/reference/#/p5/createSlider
 	slider = createSlider(0, Object.keys(qs).length-1, 0, 1);  // https://stackoverflow.com/questions/5223/length-of-a-javascript-object
-	slider.position(150, num_rows * outer_width + 690);
 	slider.style('width', '500px');
+	slider.position(0, 0, 'relative');
 }
 
 function draw() {
@@ -348,7 +352,7 @@ function draw() {
 	    fill(0);
 	    noStroke();
 		textSize(12);
-		text('Timestep: ' + str(slider.value()), 300, num_rows * outer_width + 1.5 * outer_width + 20, 300, 100);
+		text('Timestep: ' + str(slider.value()), 300, num_rows * outer_width + 1.5 * outer_width + 15, 300, 100);
 
 		if (q_statuses[timestep] == 0) {
 			text('Update step type: Learning', 300, num_rows * outer_width + 1.5 * outer_width + 40, 400, 100);
