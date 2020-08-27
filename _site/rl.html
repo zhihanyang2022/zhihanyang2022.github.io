@@ -1,47 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-<link rel="stylesheet" type="text/css" href="https://cdn.rawgit.com/dreampulse/computer-modern-web-font/master/fonts.css">
-<link rel="stylesheet" type="text/css" href="/assets/navbar.css">
-<link href='https://fonts.googleapis.com/css?family=Titillium Web' rel='stylesheet'>
-
-<style>
-.grid-container {
-  display: grid;
-  
-  grid-template-columns: repeat(auto-fill, minmax(225px, 1fr));
-  
-  grid-gap: 10px;
-
-  /* essential for centering the cards*/
-  margin: auto;
-  width: 50%;
-  align-items: center;
-  justify-items: center;
-}
-
-.grid-item {
-  background-color: rgba(255, 255, 255, 0.8); /* white */
-  border: 3px solid rgba(192, 192, 192, 0.8); /* silver */
-  border-radius: 10px;
-  padding: 10px;
-  font-size: 15px;
-  text-align: center;
-  width: 90%;
-}
-
-.grid-image {
-  width: 100%;
-}
-
-p, h1, h2, h3 {
-  /*font-family: "Computer Modern Serif";*/
-  font-family: 'Titillium Web', Verdana, Helvetica, sans-serif;
-}
-
-</style>
+	<link rel="stylesheet" type="text/css" href="/assets/navbar.css">
+	<link rel="stylesheet" type="text/css" href="/assets/rl.css">
+	<link href='https://fonts.googleapis.com/css?family=Titillium Web' rel='stylesheet'>
+	<!-- <meta http-equiv="refresh" content="1" > -->
 </head>
-<body style="background-color:lightpink;">
+<body>
 
 <!-- navigation bar -->
 
@@ -53,23 +18,25 @@ p, h1, h2, h3 {
   <li><a href="/about">About</a></li>
 </ul>
 
+<div class='content'>
+
 <h1 align='center'>Notes for Sutton & Barto Book (2018)</h1>
-<p align='center'>Here's my notes, implementation and experiments on some classical and deep RL algorithms mentioned in the book.</p>
+<p align='center'>Here's my notes and Python implementation on some classical and deep RL algorithms mentioned in the book.</p>
 
 <!-- ============================== -->
 
 <h2 align='center'>Chapter 4: Dynamic Programming</h2>
 
 
-<div class="grid-container">
+<ul class='card-container'>
 
-  <div class="grid-item">
-    <img src='https://i.loli.net/2020/08/13/QBmF7f3EvKicbeT.png' class="grid-image">
+  <li class="card">
+    <img src='https://i.loli.net/2020/08/13/QBmF7f3EvKicbeT.png' class="card-image">
     <h3><a href='/rl/policy_iteration_in_practice'>Policy Iteration in Practice</a></h3>
     <p>With a focus on truncated policy evaluation.</p>
-  </div>
+  </li>
 
-</div>
+</ul>
 
 <h2 align='center'>Chapter 5: Monte Carlo Methods</h2>
 
@@ -77,15 +44,15 @@ p, h1, h2, h3 {
 
 <h2 align='center'>Chapter 6: Temporal-Difference Learning</h2>
 
-<div class="grid-container">
+<ul class='card-container'>
 
-  <div class="grid-item">
-    <img src='https://i.loli.net/2020/07/28/FfkQOgyP2HT6KCL.png' class="grid-image">
-    <h3><a href='/rl/sarsa_qlearning_comparison'>SARSA vs. Q-Learning</a></h3>
-    <p>On-policy vs. off-policy algorithms for TD control.</p>
-  </div>
+ 	<li class='card'>
+	    <img src='https://i.loli.net/2020/07/28/FfkQOgyP2HT6KCL.png' class="card-image">
+	    <h3><a href='/rl/sarsa_qlearning_comparison'>SARSA vs. Q-Learning</a></h3>
+	    <p>On-policy vs. off-policy algorithms for TD control.</p>
+    </li>
 
-</div>
+</ul>
 
 <!-- ============================== -->
 
@@ -93,19 +60,27 @@ p, h1, h2, h3 {
 
 <h2 align='center'>Chapter 8: Planning and Learning with Tabular Methods</h2>
 
-<div class="grid-container">
+<ul class='card-container'>
 
-  <div class="grid-item">
-    <img src='https://i.loli.net/2020/08/12/wUje1WShKVT8csl.png' class="grid-image">
-    <h3><a href='/rl/dynaq'>Dyna-Q</a></h3>
-    <p>An introduction to planning build on top of Q-learning.</p>
-  </div>
+    <li class='card'>
+	    <img src='https://i.loli.net/2020/08/27/HjyNtiAk6nuo84K.jpg' class="card-image">
+	    <h3><a href='/rl/dynaq'>Dyna-Q</a></h3>
+	    <p>An introduction to planning using Q-learning.</p>
+    </li>
 
-  <div class="grid-item">
-    <img src='https://i.loli.net/2020/08/25/bornMOFQjDLlUAC.png' class="grid-image">
-    <h3><a href='/2020-08-24-prioritized-sweeping.html'>Prioritized Sweeping</a></h3>
-    <p>An interactive animation using p5.js on efficiency-improved Dyna-Q.</p>
-  </div>
+    <li class='card'>
+	    <img src='https://i.loli.net/2020/08/25/bornMOFQjDLlUAC.png' class="card-image">
+	    <h3><a href='/2020-08-24-prioritized-sweeping.html'>Prioritized Sweeping</a></h3>
+	    <p>Improving the planning efficiency of DynaQ.</p>
+    </li>
+
+    <li class='card'>
+	    <img src='https://i.loli.net/2020/08/27/SWCrT3xkPMBZo29.png' class="card-image">
+	    <h3><a href='/rl/rollout_algorithms'>Rollout Algorithms</a></h3>
+	    <p>A method of decision-time planning; demo using tic-tac-toe.</p>
+    </li>
+
+</ul>
 
 </div>
 

@@ -1,4 +1,74 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.5">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2020-08-26T11:41:03-05:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Zhihan’s Deep RL Notes</title><subtitle>Zhihan's notes on deep reinforcement learning. For Pytorch implementations, check out https://github.com/zhihanyang2022/deeprl_notes.</subtitle><author><name>Zhihan Yang</name></author><entry><title type="html">Dyna-Q</title><link href="http://localhost:4000/rl/dynaq" rel="alternate" type="text/html" title="Dyna-Q" /><published>2020-08-11T15:30:00-05:00</published><updated>2020-08-11T15:30:00-05:00</updated><id>http://localhost:4000/rl/dynaq</id><content type="html" xml:base="http://localhost:4000/rl/dynaq">&lt;script src=&quot;https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML&quot; type=&quot;text/javascript&quot;&gt;&lt;/script&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.5">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2020-08-27T00:58:21-05:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Zhihan’s Deep RL Notes</title><subtitle>Zhihan's notes on deep reinforcement learning. For Pytorch implementations, check out https://github.com/zhihanyang2022/deeprl_notes.</subtitle><author><name>Zhihan Yang</name></author><entry><title type="html">Rollout Algorithms</title><link href="http://localhost:4000/rl/rollout_algorithms" rel="alternate" type="text/html" title="Rollout Algorithms" /><published>2020-08-26T23:00:00-05:00</published><updated>2020-08-26T23:00:00-05:00</updated><id>http://localhost:4000/rl/rollout-algorithms</id><content type="html" xml:base="http://localhost:4000/rl/rollout_algorithms">&lt;script src=&quot;https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML&quot; type=&quot;text/javascript&quot;&gt;&lt;/script&gt;
+
+&lt;ul id=&quot;markdown-toc&quot;&gt;
+  &lt;li&gt;&lt;a href=&quot;#how-they-work&quot; id=&quot;markdown-toc-how-they-work&quot;&gt;How they work?&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;#demo-using-tic-tac-toe-2-player-game&quot; id=&quot;markdown-toc-demo-using-tic-tac-toe-2-player-game&quot;&gt;Demo using tic-tac-toe (2 player game)&lt;/a&gt;    &lt;ul&gt;
+      &lt;li&gt;&lt;a href=&quot;#human-first&quot; id=&quot;markdown-toc-human-first&quot;&gt;Human first&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href=&quot;#ai-first&quot; id=&quot;markdown-toc-ai-first&quot;&gt;AI first&lt;/a&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;#why-they-work&quot; id=&quot;markdown-toc-why-they-work&quot;&gt;Why they work?&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Quote from the book:&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Rollout algorithms are decision-time planning algorithms based on Monte Carlo control applied to simulated trajectories that all begin at the current environment state.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2 id=&quot;how-they-work&quot;&gt;How they work?&lt;/h2&gt;
+
+&lt;p&gt;The basic version of the rollout algorithm is very easy to understand and implement because it doesn’t keep track of any values. Consider an agent currently in some state &lt;script type=&quot;math/tex&quot;&gt;s&lt;/script&gt; that needs to take an action &lt;script type=&quot;math/tex&quot;&gt;a \in \mathcal{A}(s)&lt;/script&gt;. The agent needs to decide which action(s) is/are the best. If it is using the rollout algorithm, here’s what it would do:&lt;/p&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;average_returns&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[]&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;available_actions&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;actions&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;current_state&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;action&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;available_actions&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;returns&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[]&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;_&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;range&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;num_samples&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;while&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;True&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;reward&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;next_state&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;env&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;step&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;current_state&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;action&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;reward&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;next_state&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;terminal_states&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+                &lt;span class=&quot;k&quot;&gt;break&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;current_state&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;next_state&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;action&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;rollout_policy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;current_state&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    		&lt;span class=&quot;n&quot;&gt;returns&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;append&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;return&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;average_return&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mean&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;returns&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;average_returns&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;append&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;average_return&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;argmax_action&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;available_actions&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;randomly_choose&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;argmax&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;average_returns&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))]&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;In essence, for each action, it collects and averages the returns of &lt;code class=&quot;highlighter-rouge&quot;&gt;num_samples&lt;/code&gt; number of partial (starting from the current state-action pair) trajectories under the rollout policy. From this perspective, the rollout algorithm uses the idea of Monte Carlo learning but is obviously not a learning method because it discards the average returns and never perform any value updates.&lt;/p&gt;
+
+&lt;p&gt;Perhaps surprisingly, the procedure described above generalizes perfectly well to two-player games such a chess, where players take actions one after another. We simply treat the two players as one player because they would both use the same rollout policy.&lt;/p&gt;
+
+&lt;h2 id=&quot;demo-using-tic-tac-toe-2-player-game&quot;&gt;Demo using tic-tac-toe (2 player game)&lt;/h2&gt;
+
+&lt;p&gt;In this demo, the rollout policy is a random policy, but the AI plays near optimally. Here’s a relevant quote from the book:&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;In some applications, a rollout algorithm can produce good performance even if the rollout policy is completely random.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;1000 partial trajectories are sampled per action available. Upon the end of a trajectory, the agent checks whether it has a victory (+1 reward), a draw (0 reward) or a loss (-100 reward). The -100 reward was hand-tuned so that the agent focuses more on blocking potential wins of the human player.&lt;/p&gt;
+
+&lt;p&gt;Code will be released soon.&lt;/p&gt;
+
+&lt;h3 id=&quot;human-first&quot;&gt;Human first&lt;/h3&gt;
+
+&lt;iframe style=&quot;width:100%; height:300px&quot; src=&quot;https://www.youtube.com/embed/jAJEwmlu9Vo&quot; frameborder=&quot;0&quot; allow=&quot;accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture&quot;&gt;&lt;/iframe&gt;
+
+&lt;h3 id=&quot;ai-first&quot;&gt;AI first&lt;/h3&gt;
+
+&lt;iframe style=&quot;width:100%; height:300px&quot; src=&quot;https://www.youtube.com/embed/zdiyJqw3_oM&quot; frameborder=&quot;0&quot; allow=&quot;accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture&quot;&gt;&lt;/iframe&gt;
+
+&lt;h2 id=&quot;why-they-work&quot;&gt;Why they work?&lt;/h2&gt;
+
+&lt;p&gt;By collecting average returns of partial trajectories, the agent has value estimates of all actions available in the current state &lt;script type=&quot;math/tex&quot;&gt;s&lt;/script&gt;, &lt;script type=&quot;math/tex&quot;&gt;\{q_{\pi}(s, a) \mid a \in \mathcal{A}(s)\}&lt;/script&gt;. The rollout algorithm acts greedily, i.e., picks the action that maximizes &lt;script type=&quot;math/tex&quot;&gt;q_{\pi}(s, a)&lt;/script&gt;. By the policy improvement theorem, &lt;script type=&quot;math/tex&quot;&gt;\max_{a'} q_{\pi}(s, a')&lt;/script&gt; is strictly greater than &lt;script type=&quot;math/tex&quot;&gt;q_{\pi}(s, \pi(s))&lt;/script&gt; unless the rollout policy &lt;script type=&quot;math/tex&quot;&gt;\pi&lt;/script&gt; is already optimal, which means that first following the greedy action yields a higher return in expectation. As mentioned in the book,&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;the aim of a rollout algorithm is to improve upon the rollout policy; not to ﬁnd an optimal policy.&lt;/p&gt;
+&lt;/blockquote&gt;</content><author><name>Zhihan Yang</name></author><summary type="html"></summary></entry><entry><title type="html">Dyna-Q</title><link href="http://localhost:4000/rl/dynaq" rel="alternate" type="text/html" title="Dyna-Q" /><published>2020-08-11T15:30:00-05:00</published><updated>2020-08-11T15:30:00-05:00</updated><id>http://localhost:4000/rl/dynaq</id><content type="html" xml:base="http://localhost:4000/rl/dynaq">&lt;script src=&quot;https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML&quot; type=&quot;text/javascript&quot;&gt;&lt;/script&gt;
 
 &lt;p&gt;Time took to write: 8 days.&lt;/p&gt;
 

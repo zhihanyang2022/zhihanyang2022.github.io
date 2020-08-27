@@ -1,0 +1,89 @@
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>Rollout Algorithms</title>
+	<link rel="stylesheet" type="text/css" href="/assets/rl_post.css">
+	<link rel="stylesheet" type="text/css" href="https://cdn.rawgit.com/dreampulse/computer-modern-web-font/master/fonts.css">
+</head>
+<body>
+	<div class="content">
+		<p><a href="/rl">Back</a> to the list of RL posts.</a>
+		<h1>Rollout Algorithms</h1>
+		<p>Started by Zhihan on 2020-08-26 23:00:00 -0500.</p>
+		<script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+
+<ul id="markdown-toc">
+  <li><a href="#how-they-work" id="markdown-toc-how-they-work">How they work?</a></li>
+  <li><a href="#demo-using-tic-tac-toe-2-player-game" id="markdown-toc-demo-using-tic-tac-toe-2-player-game">Demo using tic-tac-toe (2 player game)</a>    <ul>
+      <li><a href="#human-first" id="markdown-toc-human-first">Human first</a></li>
+      <li><a href="#ai-first" id="markdown-toc-ai-first">AI first</a></li>
+    </ul>
+  </li>
+  <li><a href="#why-they-work" id="markdown-toc-why-they-work">Why they work?</a></li>
+</ul>
+<p>Quote from the book:</p>
+
+<blockquote>
+  <p>Rollout algorithms are decision-time planning algorithms based on Monte Carlo control applied to simulated trajectories that all begin at the current environment state.</p>
+</blockquote>
+
+<h2 id="how-they-work">How they work?</h2>
+
+<p>The basic version of the rollout algorithm is very easy to understand and implement because it doesn’t keep track of any values. Consider an agent currently in some state <script type="math/tex">s</script> that needs to take an action <script type="math/tex">a \in \mathcal{A}(s)</script>. The agent needs to decide which action(s) is/are the best. If it is using the rollout algorithm, here’s what it would do:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">average_returns</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">available_actions</span> <span class="o">=</span> <span class="n">actions</span><span class="p">(</span><span class="n">current_state</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="n">available_actions</span><span class="p">:</span>
+    <span class="n">returns</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_samples</span><span class="p">):</span>
+        <span class="k">return</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="n">reward</span><span class="p">,</span> <span class="n">next_state</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">current_state</span><span class="p">,</span> <span class="n">action</span><span class="p">)</span>
+            <span class="k">return</span> <span class="o">+=</span> <span class="n">reward</span>
+            <span class="k">if</span> <span class="n">next_state</span> <span class="ow">in</span> <span class="n">terminal_states</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="n">current_state</span> <span class="o">=</span> <span class="n">next_state</span>
+            <span class="n">action</span> <span class="o">=</span> <span class="n">rollout_policy</span><span class="p">(</span><span class="n">current_state</span><span class="p">)</span>
+    		<span class="n">returns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="k">return</span><span class="p">)</span>
+    <span class="n">average_return</span> <span class="o">=</span> <span class="n">mean</span><span class="p">(</span><span class="n">returns</span><span class="p">)</span>
+    <span class="n">average_returns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">average_return</span><span class="p">)</span>
+<span class="n">argmax_action</span> <span class="o">=</span> <span class="n">available_actions</span><span class="p">[</span><span class="n">randomly_choose</span><span class="p">(</span><span class="n">argmax</span><span class="p">(</span><span class="n">average_returns</span><span class="p">))]</span>
+</code></pre></div></div>
+
+<p>In essence, for each action, it collects and averages the returns of <code class="highlighter-rouge">num_samples</code> number of partial (starting from the current state-action pair) trajectories under the rollout policy. From this perspective, the rollout algorithm uses the idea of Monte Carlo learning but is obviously not a learning method because it discards the average returns and never perform any value updates.</p>
+
+<p>Perhaps surprisingly, the procedure described above generalizes perfectly well to two-player games such a chess, where players take actions one after another. We simply treat the two players as one player because they would both use the same rollout policy.</p>
+
+<h2 id="demo-using-tic-tac-toe-2-player-game">Demo using tic-tac-toe (2 player game)</h2>
+
+<p>In this demo, the rollout policy is a random policy, but the AI plays near optimally. Here’s a relevant quote from the book:</p>
+
+<blockquote>
+  <p>In some applications, a rollout algorithm can produce good performance even if the rollout policy is completely random.</p>
+</blockquote>
+
+<p>1000 partial trajectories are sampled per action available. Upon the end of a trajectory, the agent checks whether it has a victory (+1 reward), a draw (0 reward) or a loss (-100 reward). The -100 reward was hand-tuned so that the agent focuses more on blocking potential wins of the human player.</p>
+
+<p>Code will be released soon.</p>
+
+<h3 id="human-first">Human first</h3>
+
+<iframe style="width:100%; height:300px" src="https://www.youtube.com/embed/jAJEwmlu9Vo" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"></iframe>
+
+<h3 id="ai-first">AI first</h3>
+
+<iframe style="width:100%; height:300px" src="https://www.youtube.com/embed/zdiyJqw3_oM" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"></iframe>
+
+<h2 id="why-they-work">Why they work?</h2>
+
+<p>By collecting average returns of partial trajectories, the agent has value estimates of all actions available in the current state <script type="math/tex">s</script>, <script type="math/tex">\{q_{\pi}(s, a) \mid a \in \mathcal{A}(s)\}</script>. The rollout algorithm acts greedily, i.e., picks the action that maximizes <script type="math/tex">q_{\pi}(s, a)</script>. By the policy improvement theorem, <script type="math/tex">\max_{a'} q_{\pi}(s, a')</script> is strictly greater than <script type="math/tex">q_{\pi}(s, \pi(s))</script> unless the rollout policy <script type="math/tex">\pi</script> is already optimal, which means that first following the greedy action yields a higher return in expectation. As mentioned in the book,</p>
+
+<blockquote>
+  <p>the aim of a rollout algorithm is to improve upon the rollout policy; not to ﬁnd an optimal policy.</p>
+</blockquote>
+
+
+		<p><a href="/rl">Back</a> to the list of RL posts.</a>
+	</div>
+</body>
+</html>

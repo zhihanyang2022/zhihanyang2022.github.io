@@ -37,7 +37,6 @@ Notes:
 
 **Proof.** Suppose we are in some arbitrary state $$s \in \mathcal{S}$$. The value of $$s$$ under some arbitrary policy $$\pi$$ is given by $$v_{\pi}(s)$$. Define $$\pi’(s)$$ as the new policy that acts greedily with respect $$v$$, that is,
 
-
 $$
 \begin{align*}
 \pi'(s) 

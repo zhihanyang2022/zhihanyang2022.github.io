@@ -42,7 +42,7 @@ function setup() {
 
 function draw() {
 
-	background(255);
+	background(0);
 
 	timestep = slider.value();
 
@@ -348,7 +348,7 @@ function draw() {
 	    
 	    // text(' ' + str(j) + ',' + str(i), x+item_width/2, y+item_width/2, item_width-20, item_width-20);
 
-	    fill(0);
+	    fill(255);
 	    noStroke();
 		textSize(12);
 		text('Timestep: ' + str(slider.value()), 300, num_rows * outer_width + 1.5 * outer_width + 15, 300, 100);
