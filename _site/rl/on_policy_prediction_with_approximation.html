@@ -1,0 +1,233 @@
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>On-policy Prediction with Approximation</title>
+	<link rel="stylesheet" type="text/css" href="/assets/rl_post.css">
+	<link rel="stylesheet" type="text/css" href="https://cdn.rawgit.com/dreampulse/computer-modern-web-font/master/fonts.css">
+</head>
+<body>
+	<div class="content">
+		<p><a href="/rl">Back</a> to the list of RL posts.</a>
+		<h1>On-policy Prediction with Approximation</h1>
+		<p>Started by Zhihan on 2020-08-31 16:30:00 -0500.</p>
+		<script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+
+<ul id="markdown-toc">
+  <li><a href="#why-approximate-value-functions" id="markdown-toc-why-approximate-value-functions">Why approximate value functions?</a></li>
+  <li><a href="#how-to-approximate-supervised-learning-using-sgd" id="markdown-toc-how-to-approximate-supervised-learning-using-sgd">How to approximate: supervised learning using SGD</a></li>
+  <li><a href="#linear-approximator--feature-construction--generalized-linear-model" id="markdown-toc-linear-approximator--feature-construction--generalized-linear-model">Linear approximator + feature construction = generalized linear model</a>    <ul>
+      <li><a href="#polynomial-features" id="markdown-toc-polynomial-features">Polynomial features</a></li>
+      <li><a href="#fourier-features" id="markdown-toc-fourier-features">Fourier features</a></li>
+    </ul>
+  </li>
+  <li><a href="#metric-of-error-for-evaluation" id="markdown-toc-metric-of-error-for-evaluation">Metric of error for evaluation</a></li>
+  <li><a href="#example" id="markdown-toc-example">Example</a>    <ul>
+      <li><a href="#problem-setup" id="markdown-toc-problem-setup">Problem setup</a></li>
+      <li><a href="#different-mc-algorithms" id="markdown-toc-different-mc-algorithms">Different MC Algorithms</a>        <ul>
+          <li><a href="#basic-structure" id="markdown-toc-basic-structure">Basic structure</a></li>
+          <li><a href="#value-learner-for-tabular-mc" id="markdown-toc-value-learner-for-tabular-mc">Value learner for tabular MC</a></li>
+          <li><a href="#value-learner-for-gradient-mc" id="markdown-toc-value-learner-for-gradient-mc">Value learner for gradient MC</a></li>
+        </ul>
+      </li>
+      <li><a href="#root-value-error-over-time" id="markdown-toc-root-value-error-over-time">Root value error over time*</a></li>
+      <li><a href="#learned-values" id="markdown-toc-learned-values">Learned values*</a></li>
+    </ul>
+  </li>
+</ul>
+
+<p>Section headings with stars (*) compare multiple algorithms.</p>
+
+<p>Presentation notes:</p>
+
+<ul>
+  <li>The only concept that is new here is “approximation”; “on-policy” and “prediction” has been discussed by previous sections of the book extensively.</li>
+  <li>Follow the table of content instead of reading off my notes directly.</li>
+  <li>Starting following my notes more closely starting from the third section.</li>
+</ul>
+
+<h2 id="why-approximate-value-functions">Why approximate value functions?</h2>
+
+<p>In general, the value function is smooth, which means a small change in state leads to a small change in value. Without taking advantage of this observation, the following two issues arise:</p>
+
+<ul>
+  <li>Treating nearby states as if their values are not related at all and updating their values independently slows down learning.</li>
+  <li>Some states are not visited at all during training but might show up after deployment. If we don’t interpolate their values using those of the seen states (like what we did in tabular methods), their values would remain randomly initialized. This problem can be particularly serious for high-dimensional state spaces in real-world applications (e.g., lidar data from autonomous vehicles) because states in deployment almost surely never appear in training data.</li>
+</ul>
+
+<p>How we take advantage of the smoothness observation? One way to do so is to approximate the value function using a parameterized functional form such that its number of tunable parameters (or weights) is far less than the number of states. By doing so:</p>
+
+<ul>
+  <li>When weights are updated for a single state, the values of other states also change, hopefully in a good way. If so, <strong>rapid learning</strong> is achieved.</li>
+  <li>Unlike lookup tables, a parameterized value function allows for the evaluation of unseen states. This process is known as <strong>generalization</strong> and is similar to interpolation.</li>
+</ul>
+
+<h2 id="how-to-approximate-supervised-learning-using-sgd">How to approximate: supervised learning using SGD</h2>
+
+<p><strong>Prediction is regression.</strong> In a prediction problem, we want to learn a mapping from each state to its expected return (under some policy), the average of all seen returns so far. It happens to be that by minizing the sum of square errors of a approximator with enough capacity (like a neural network) the outputs approximate the conditional averages of the target data (conditioned on input variables). Therefore, we can use an approximator (again, assuming enough capacity) to perform prediction by training it on existing state-return data using the sum of square errors.</p>
+
+<p><strong>SGD is a online method for optimizing the weights of a regression approximator.</strong> Stochastic gradient descent (SGD) is simply gradient descent applied to batches of one pair of input and target values. As we mentioned in the last paragraph, we will be using this technique to minimize the sum of square errors.</p>
+
+<p>The SGD update rule:</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{align*}
+\mathbf{w}_{t+1} 
+&\leftarrow \mathbf{w}_t - \frac{1}{2} \alpha \nabla \left\{ \left[ G_t - \hat{v}(\mathbf{s}_t, \mathbf{w}_t)\right]^2 \right\}  \\
+&= \mathbf{w}_t + \alpha \left[ G_t - \hat{v}(\mathbf{s}_t, \mathbf{w}_t) \right] \nabla \left\{ \hat{v}(\mathbf{s}_t, \mathbf{w}_t) \right\} \\
+\end{align*} %]]></script>
+
+<p>where:</p>
+
+<ul>
+  <li><script type="math/tex">\mathbf{w}_t</script> is the weight vector at timestep <script type="math/tex">t</script>.</li>
+  <li><script type="math/tex">\alpha</script> is the learning rate.</li>
+  <li><script type="math/tex">\nabla \left\{ \cdots \right\}</script> is the gradient of the function inside the curly brackets with respect to <script type="math/tex">\mathbf{w}_t</script>.</li>
+  <li><script type="math/tex">G_t</script> is a sample return collected from timestep <script type="math/tex">t</script> to the timestep at which the terminal state is reached.</li>
+  <li><script type="math/tex">\hat{v}</script> is the function approximator which inputs a state vector <script type="math/tex">\mathbf{s}_t</script> (which contains the raw features of some state) and a weight vector <script type="math/tex">\mathbf{w}_t</script> and outputs the predicted value of <script type="math/tex">\mathbf{s}_t</script>.</li>
+</ul>
+
+<p><strong>SGD can be conveniently applied to a linear approximator.</strong> We can easily apply the SGD update rule to a linear approximator:</p>
+
+<script type="math/tex; mode=display">\mathbf{w}_{t+1} \leftarrow \mathbf{w}_t + \alpha \left[ G_t - \hat{v}(\mathbf{s}_t, \mathbf{w}_t) \right] \mathbf{s}_t \nonumber \\</script>
+
+<h2 id="linear-approximator--feature-construction--generalized-linear-model">Linear approximator + feature construction = generalized linear model</h2>
+
+<p>By creating nonlinear transformations of input variables, a linear approximator becomes much more powerful and general. Here are two popular transformations we will consider.</p>
+
+<p>Notes about the figures:</p>
+
+<ul>
+  <li>Origin is placed at the top left corner of each sub-figure.</li>
+  <li>Both <script type="math/tex">s_1</script> and <script type="math/tex">s_2</script> are normalized to the range <script type="math/tex">\left[0, 1\right]</script>.</li>
+</ul>
+
+<h3 id="polynomial-features">Polynomial features</h3>
+
+<p><img style="display:block; margin:auto; max-width:650px" src="/images/2020-08-31-on-policy-prediction-with-approximation/polynomial_features.png" /></p>
+<figcaption style="text-align:center"><b>Figure 1.</b>  2D 4th-order Polynomial features (25 features in total).</figcaption>
+
+<h3 id="fourier-features">Fourier features</h3>
+
+<p><img style="display:block; margin:auto; max-width:650px" src="/images/2020-08-31-on-policy-prediction-with-approximation/fourier_features.png" /></p>
+<figcaption style="text-align:center"><b>Figure 2.</b>  2D 4th-order Fourier features (25 features in total).</figcaption>
+
+<h2 id="metric-of-error-for-evaluation">Metric of error for evaluation</h2>
+
+<p>It is convenient to measure the degree of error between the approximated values and the true values using, for example, root mean squared error. However, such classical metrics in ML do not reflect the frequency at which states are visited. For example, the value of a state that is never visitied by the policy of interest is in many cases less important than the value of a state that is frequently visited. Therefore, we would like to weigh the error of a state by its probability under the on-policy distribution.</p>
+
+<p>By adding a slight modification to the root mean squares error function, we arrive at the following new error function, the root mean squared value error:</p>
+
+<script type="math/tex; mode=display">\sqrt{\text{VE}} = \sqrt{\sum_{\mathbf{s} \in \mathcal{S}} \mu(\mathbf{s}) \left[v(\mathbf{s}) - \hat{v}(\mathbf{s}, \mathbf{w})\right]^2}</script>
+
+<p>where <script type="math/tex">\mu</script> is the on-policy distribution and <script type="math/tex">v(\mathbf{s})</script> is the true value of the state vector <script type="math/tex">\mathbf{s}</script>.</p>
+
+<p>Note that this metric is merely used for evaluating performance; during training, the sum of squares error is used.</p>
+
+<h2 id="example">Example</h2>
+
+<h3 id="problem-setup">Problem setup</h3>
+
+<ul>
+  <li>20-by-20 gridworld</li>
+  <li>Coordinate of the starting state: (0, 0) / top-left corner</li>
+  <li>Coordinate of the terminal state: (19, 19) / bottom-right corner</li>
+  <li>Reward: all transitions yield a reward of -1 except for those leading into the terminal state, which yields a reward of zero</li>
+  <li>Discount factor: 0.90, less than 1 in order to induce curvature in the true value function, making the problem more challenging for function approximators</li>
+  <li>Policy to evaluate: the optimal policy (found by policy iteration)</li>
+</ul>
+
+<h3 id="different-mc-algorithms">Different MC Algorithms</h3>
+
+<h4 id="basic-structure">Basic structure</h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_episodes</span><span class="p">):</span>
+  
+  <span class="c1"># states and rewards are two lists
+</span>  <span class="c1"># rewards[t] is the immediate reward of taking the action given by the policy in state[t]
+</span>  
+  <span class="n">states</span><span class="p">,</span> <span class="n">rewards</span> <span class="o">=</span> <span class="n">record_one_trajectory</span><span class="p">()</span>  
+  
+  <span class="n">T</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">states</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span> <span class="c1"># last index
+</span>  <span class="n">G</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># return
+</span>  <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>  <span class="c1"># T-1, T-2, ..., 1, 0
+</span>    <span class="n">G</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">discount_factor</span> <span class="o">*</span> <span class="n">G</span> <span class="o">+</span> <span class="n">rewards</span><span class="p">[</span><span class="n">t</span><span class="p">]</span>
+    <span class="n">value_learner</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">states</span><span class="p">[</span><span class="n">t</span><span class="p">],</span> <span class="n">G</span><span class="p">)</span>  <span class="c1"># different MC algorithms differ in their value_learner
+</span></code></pre></div></div>
+
+<h4 id="value-learner-for-tabular-mc">Value learner for tabular MC</h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Table</span><span class="p">:</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state_space_shape</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">sum_of_returns</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">state_space_shape</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">counts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">state_space_shape</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1e-5</span>  <span class="c1"># avoid division by zero
+</span>    
+  <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span><span class="nb">tuple</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span><span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">sum_of_returns</span><span class="p">[</span><span class="n">state</span><span class="p">]</span> <span class="o">+=</span> <span class="n">target</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">counts</span><span class="p">[</span><span class="n">state</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+    
+  <span class="o">@</span><span class="nb">property</span>
+  <span class="k">def</span> <span class="nf">v</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
+    <span class="s">"""Return the learned values."""</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">sum_of_returns</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">counts</span>
+</code></pre></div></div>
+
+<h4 id="value-learner-for-gradient-mc">Value learner for gradient MC</h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">LinearApproximator</span><span class="p">:</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lr</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">fc</span><span class="p">,</span> <span class="n">state_space_shape</span><span class="p">:</span><span class="nb">tuple</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">lr</span> <span class="o">=</span> <span class="n">lr</span>  <span class="c1"># learning rate
+</span>    <span class="bp">self</span><span class="o">.</span><span class="n">fc</span> <span class="o">=</span> <span class="n">fc</span>  <span class="c1"># feature constructor
+</span>    <span class="bp">self</span><span class="o">.</span><span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">fc</span><span class="o">.</span><span class="n">num_features</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">state_space_shape</span> <span class="o">=</span> <span class="n">state_space_shape</span>
+		
+  <span class="k">def</span> <span class="nf">calc_v</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span><span class="nb">tuple</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">fc</span><span class="o">.</span><span class="n">preprocess</span><span class="p">(</span><span class="n">state</span><span class="p">))</span>
+
+  <span class="k">def</span> <span class="nf">calc_grad_wrt_w</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span><span class="nb">tuple</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fc</span><span class="o">.</span><span class="n">preprocess</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span><span class="nb">tuple</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span><span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">w</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lr</span> <span class="o">*</span> <span class="p">(</span><span class="n">target</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_v</span><span class="p">(</span><span class="n">state</span><span class="p">))</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_grad_wrt_w</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+
+  <span class="o">@</span><span class="nb">property</span>
+  <span class="k">def</span> <span class="nf">v</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state_space_shape</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">row_ix</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state_space_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+      <span class="k">for</span> <span class="n">col_ix</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state_space_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="p">(</span><span class="n">row_ix</span><span class="p">,</span> <span class="n">col_ix</span><span class="p">)</span>
+        <span class="n">v</span><span class="p">[</span><span class="n">state</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_v</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">v</span>
+</code></pre></div></div>
+
+<h3 id="root-value-error-over-time">Root value error over time*</h3>
+
+<p>The root mean squared value error requires the on-policy distribution. While this can be collected during training, I find the errors more meaningful and interpretable when the on-policy distribution is approximated before training happens.</p>
+
+<iframe src="/animations/2020-08-31-on-policy-prediction-with-approximation/on_policy_distribution.html" width="550" height="520" frameborder="0" style="display:block; margin: auto;"></iframe>
+
+<figcaption style="max-width:430px; margin:auto; text-align:center"><b>Animation 1.</b> On-policy distribution of the optimal policy.</figcaption>
+
+<p>Some important observations of the plot below:</p>
+
+<ul>
+  <li>Initially, although all gradient MC methods had a learning rate of only 0.01, their errors dropped faster than the tabular MC method.</li>
+  <li>Between 10 and 100 episodes, the error of the tabular method dropped below the gradient MC method using linear features (due to the <strong>limited representation power of linear features</strong>).</li>
+  <li>Finally, right before reaching 1000 episodes, the error of the tabular method dropped below the gradient MC method using Fourier features, despite the fact that Fourier features led to the fastest initial learning.</li>
+  <li>After 1000 epsiodes, the gradient MC method using polynomial features still won the tabular method.</li>
+</ul>
+
+<p><img style="display:block; margin:auto; max-width:400px" src="/images/2020-08-31-on-policy-prediction-with-approximation/errors_over_time.png" /></p>
+<figcaption style="max-width:450px; margin:auto"><b>Figure 3.</b>  Root value error over time for different algorithms.</figcaption>
+
+<h3 id="learned-values">Learned values*</h3>
+
+<p><img style="display:block; margin:auto; max-width:100%" src="/images/2020-08-31-on-policy-prediction-with-approximation/learned_values.png" /></p>
+<figcaption style="max-width:400px; margin:auto"><b>Figure 4.</b>  Values learned by different methods.</figcaption>
+
+
+		<p><a href="/rl">Back</a> to the list of RL posts.</a>
+	</div>
+</body>
+</html>

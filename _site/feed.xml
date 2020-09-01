@@ -1,4 +1,218 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.5">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2020-08-27T00:58:21-05:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Zhihan’s Deep RL Notes</title><subtitle>Zhihan's notes on deep reinforcement learning. For Pytorch implementations, check out https://github.com/zhihanyang2022/deeprl_notes.</subtitle><author><name>Zhihan Yang</name></author><entry><title type="html">Rollout Algorithms</title><link href="http://localhost:4000/rl/rollout_algorithms" rel="alternate" type="text/html" title="Rollout Algorithms" /><published>2020-08-26T23:00:00-05:00</published><updated>2020-08-26T23:00:00-05:00</updated><id>http://localhost:4000/rl/rollout-algorithms</id><content type="html" xml:base="http://localhost:4000/rl/rollout_algorithms">&lt;script src=&quot;https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML&quot; type=&quot;text/javascript&quot;&gt;&lt;/script&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.5">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2020-09-01T17:33:36-05:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Zhihan’s Deep RL Notes</title><subtitle>Zhihan's notes on deep reinforcement learning. For Pytorch implementations, check out https://github.com/zhihanyang2022/deeprl_notes.</subtitle><author><name>Zhihan Yang</name></author><entry><title type="html">On-policy Prediction with Approximation</title><link href="http://localhost:4000/rl/on_policy_prediction_with_approximation" rel="alternate" type="text/html" title="On-policy Prediction with Approximation" /><published>2020-08-31T16:30:00-05:00</published><updated>2020-08-31T16:30:00-05:00</updated><id>http://localhost:4000/rl/on-policy-prediction-with-approximation</id><content type="html" xml:base="http://localhost:4000/rl/on_policy_prediction_with_approximation">&lt;script src=&quot;https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML&quot; type=&quot;text/javascript&quot;&gt;&lt;/script&gt;
+
+&lt;ul id=&quot;markdown-toc&quot;&gt;
+  &lt;li&gt;&lt;a href=&quot;#why-approximate-value-functions&quot; id=&quot;markdown-toc-why-approximate-value-functions&quot;&gt;Why approximate value functions?&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;#how-to-approximate-supervised-learning-using-sgd&quot; id=&quot;markdown-toc-how-to-approximate-supervised-learning-using-sgd&quot;&gt;How to approximate: supervised learning using SGD&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;#linear-approximator--feature-construction--generalized-linear-model&quot; id=&quot;markdown-toc-linear-approximator--feature-construction--generalized-linear-model&quot;&gt;Linear approximator + feature construction = generalized linear model&lt;/a&gt;    &lt;ul&gt;
+      &lt;li&gt;&lt;a href=&quot;#polynomial-features&quot; id=&quot;markdown-toc-polynomial-features&quot;&gt;Polynomial features&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href=&quot;#fourier-features&quot; id=&quot;markdown-toc-fourier-features&quot;&gt;Fourier features&lt;/a&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;#metric-of-error-for-evaluation&quot; id=&quot;markdown-toc-metric-of-error-for-evaluation&quot;&gt;Metric of error for evaluation&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;#example&quot; id=&quot;markdown-toc-example&quot;&gt;Example&lt;/a&gt;    &lt;ul&gt;
+      &lt;li&gt;&lt;a href=&quot;#problem-setup&quot; id=&quot;markdown-toc-problem-setup&quot;&gt;Problem setup&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href=&quot;#different-mc-algorithms&quot; id=&quot;markdown-toc-different-mc-algorithms&quot;&gt;Different MC Algorithms&lt;/a&gt;        &lt;ul&gt;
+          &lt;li&gt;&lt;a href=&quot;#basic-structure&quot; id=&quot;markdown-toc-basic-structure&quot;&gt;Basic structure&lt;/a&gt;&lt;/li&gt;
+          &lt;li&gt;&lt;a href=&quot;#value-learner-for-tabular-mc&quot; id=&quot;markdown-toc-value-learner-for-tabular-mc&quot;&gt;Value learner for tabular MC&lt;/a&gt;&lt;/li&gt;
+          &lt;li&gt;&lt;a href=&quot;#value-learner-for-gradient-mc&quot; id=&quot;markdown-toc-value-learner-for-gradient-mc&quot;&gt;Value learner for gradient MC&lt;/a&gt;&lt;/li&gt;
+        &lt;/ul&gt;
+      &lt;/li&gt;
+      &lt;li&gt;&lt;a href=&quot;#root-value-error-over-time&quot; id=&quot;markdown-toc-root-value-error-over-time&quot;&gt;Root value error over time*&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href=&quot;#learned-values&quot; id=&quot;markdown-toc-learned-values&quot;&gt;Learned values*&lt;/a&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Section headings with stars (*) compare multiple algorithms.&lt;/p&gt;
+
+&lt;p&gt;Presentation notes:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;The only concept that is new here is “approximation”; “on-policy” and “prediction” has been discussed by previous sections of the book extensively.&lt;/li&gt;
+  &lt;li&gt;Follow the table of content instead of reading off my notes directly.&lt;/li&gt;
+  &lt;li&gt;Starting following my notes more closely starting from the third section.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;why-approximate-value-functions&quot;&gt;Why approximate value functions?&lt;/h2&gt;
+
+&lt;p&gt;In general, the value function is smooth, which means a small change in state leads to a small change in value. Without taking advantage of this observation, the following two issues arise:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Treating nearby states as if their values are not related at all and updating their values independently slows down learning.&lt;/li&gt;
+  &lt;li&gt;Some states are not visited at all during training but might show up after deployment. If we don’t interpolate their values using those of the seen states (like what we did in tabular methods), their values would remain randomly initialized. This problem can be particularly serious for high-dimensional state spaces in real-world applications (e.g., lidar data from autonomous vehicles) because states in deployment almost surely never appear in training data.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;How we take advantage of the smoothness observation? One way to do so is to approximate the value function using a parameterized functional form such that its number of tunable parameters (or weights) is far less than the number of states. By doing so:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;When weights are updated for a single state, the values of other states also change, hopefully in a good way. If so, &lt;strong&gt;rapid learning&lt;/strong&gt; is achieved.&lt;/li&gt;
+  &lt;li&gt;Unlike lookup tables, a parameterized value function allows for the evaluation of unseen states. This process is known as &lt;strong&gt;generalization&lt;/strong&gt; and is similar to interpolation.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;how-to-approximate-supervised-learning-using-sgd&quot;&gt;How to approximate: supervised learning using SGD&lt;/h2&gt;
+
+&lt;p&gt;&lt;strong&gt;Prediction is regression.&lt;/strong&gt; In a prediction problem, we want to learn a mapping from each state to its expected return (under some policy), the average of all seen returns so far. It happens to be that by minizing the sum of square errors of a approximator with enough capacity (like a neural network) the outputs approximate the conditional averages of the target data (conditioned on input variables). Therefore, we can use an approximator (again, assuming enough capacity) to perform prediction by training it on existing state-return data using the sum of square errors.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;SGD is a online method for optimizing the weights of a regression approximator.&lt;/strong&gt; Stochastic gradient descent (SGD) is simply gradient descent applied to batches of one pair of input and target values. As we mentioned in the last paragraph, we will be using this technique to minimize the sum of square errors.&lt;/p&gt;
+
+&lt;p&gt;The SGD update rule:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\begin{align*}
+\mathbf{w}_{t+1} 
+&amp;\leftarrow \mathbf{w}_t - \frac{1}{2} \alpha \nabla \left\{ \left[ G_t - \hat{v}(\mathbf{s}_t, \mathbf{w}_t)\right]^2 \right\}  \\
+&amp;= \mathbf{w}_t + \alpha \left[ G_t - \hat{v}(\mathbf{s}_t, \mathbf{w}_t) \right] \nabla \left\{ \hat{v}(\mathbf{s}_t, \mathbf{w}_t) \right\} \\
+\end{align*} %]]&gt;&lt;/script&gt;
+
+&lt;p&gt;where:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;script type=&quot;math/tex&quot;&gt;\mathbf{w}_t&lt;/script&gt; is the weight vector at timestep &lt;script type=&quot;math/tex&quot;&gt;t&lt;/script&gt;.&lt;/li&gt;
+  &lt;li&gt;&lt;script type=&quot;math/tex&quot;&gt;\alpha&lt;/script&gt; is the learning rate.&lt;/li&gt;
+  &lt;li&gt;&lt;script type=&quot;math/tex&quot;&gt;\nabla \left\{ \cdots \right\}&lt;/script&gt; is the gradient of the function inside the curly brackets with respect to &lt;script type=&quot;math/tex&quot;&gt;\mathbf{w}_t&lt;/script&gt;.&lt;/li&gt;
+  &lt;li&gt;&lt;script type=&quot;math/tex&quot;&gt;G_t&lt;/script&gt; is a sample return collected from timestep &lt;script type=&quot;math/tex&quot;&gt;t&lt;/script&gt; to the timestep at which the terminal state is reached.&lt;/li&gt;
+  &lt;li&gt;&lt;script type=&quot;math/tex&quot;&gt;\hat{v}&lt;/script&gt; is the function approximator which inputs a state vector &lt;script type=&quot;math/tex&quot;&gt;\mathbf{s}_t&lt;/script&gt; (which contains the raw features of some state) and a weight vector &lt;script type=&quot;math/tex&quot;&gt;\mathbf{w}_t&lt;/script&gt; and outputs the predicted value of &lt;script type=&quot;math/tex&quot;&gt;\mathbf{s}_t&lt;/script&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;strong&gt;SGD can be conveniently applied to a linear approximator.&lt;/strong&gt; We can easily apply the SGD update rule to a linear approximator:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\mathbf{w}_{t+1} \leftarrow \mathbf{w}_t + \alpha \left[ G_t - \hat{v}(\mathbf{s}_t, \mathbf{w}_t) \right] \mathbf{s}_t \nonumber \\&lt;/script&gt;
+
+&lt;h2 id=&quot;linear-approximator--feature-construction--generalized-linear-model&quot;&gt;Linear approximator + feature construction = generalized linear model&lt;/h2&gt;
+
+&lt;p&gt;By creating nonlinear transformations of input variables, a linear approximator becomes much more powerful and general. Here are two popular transformations we will consider.&lt;/p&gt;
+
+&lt;p&gt;Notes about the figures:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Origin is placed at the top left corner of each sub-figure.&lt;/li&gt;
+  &lt;li&gt;Both &lt;script type=&quot;math/tex&quot;&gt;s_1&lt;/script&gt; and &lt;script type=&quot;math/tex&quot;&gt;s_2&lt;/script&gt; are normalized to the range &lt;script type=&quot;math/tex&quot;&gt;\left[0, 1\right]&lt;/script&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;polynomial-features&quot;&gt;Polynomial features&lt;/h3&gt;
+
+&lt;p&gt;&lt;img style=&quot;display:block; margin:auto; max-width:650px&quot; src=&quot;/images/2020-08-31-on-policy-prediction-with-approximation/polynomial_features.png&quot; /&gt;&lt;/p&gt;
+&lt;figcaption style=&quot;text-align:center&quot;&gt;&lt;b&gt;Figure 1.&lt;/b&gt;  2D 4th-order Polynomial features (25 features in total).&lt;/figcaption&gt;
+
+&lt;h3 id=&quot;fourier-features&quot;&gt;Fourier features&lt;/h3&gt;
+
+&lt;p&gt;&lt;img style=&quot;display:block; margin:auto; max-width:650px&quot; src=&quot;/images/2020-08-31-on-policy-prediction-with-approximation/fourier_features.png&quot; /&gt;&lt;/p&gt;
+&lt;figcaption style=&quot;text-align:center&quot;&gt;&lt;b&gt;Figure 2.&lt;/b&gt;  2D 4th-order Fourier features (25 features in total).&lt;/figcaption&gt;
+
+&lt;h2 id=&quot;metric-of-error-for-evaluation&quot;&gt;Metric of error for evaluation&lt;/h2&gt;
+
+&lt;p&gt;It is convenient to measure the degree of error between the approximated values and the true values using, for example, root mean squared error. However, such classical metrics in ML do not reflect the frequency at which states are visited. For example, the value of a state that is never visitied by the policy of interest is in many cases less important than the value of a state that is frequently visited. Therefore, we would like to weigh the error of a state by its probability under the on-policy distribution.&lt;/p&gt;
+
+&lt;p&gt;By adding a slight modification to the root mean squares error function, we arrive at the following new error function, the root mean squared value error:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\sqrt{\text{VE}} = \sqrt{\sum_{\mathbf{s} \in \mathcal{S}} \mu(\mathbf{s}) \left[v(\mathbf{s}) - \hat{v}(\mathbf{s}, \mathbf{w})\right]^2}&lt;/script&gt;
+
+&lt;p&gt;where &lt;script type=&quot;math/tex&quot;&gt;\mu&lt;/script&gt; is the on-policy distribution and &lt;script type=&quot;math/tex&quot;&gt;v(\mathbf{s})&lt;/script&gt; is the true value of the state vector &lt;script type=&quot;math/tex&quot;&gt;\mathbf{s}&lt;/script&gt;.&lt;/p&gt;
+
+&lt;p&gt;Note that this metric is merely used for evaluating performance; during training, the sum of squares error is used.&lt;/p&gt;
+
+&lt;h2 id=&quot;example&quot;&gt;Example&lt;/h2&gt;
+
+&lt;h3 id=&quot;problem-setup&quot;&gt;Problem setup&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;20-by-20 gridworld&lt;/li&gt;
+  &lt;li&gt;Coordinate of the starting state: (0, 0) / top-left corner&lt;/li&gt;
+  &lt;li&gt;Coordinate of the terminal state: (19, 19) / bottom-right corner&lt;/li&gt;
+  &lt;li&gt;Reward: all transitions yield a reward of -1 except for those leading into the terminal state, which yields a reward of zero&lt;/li&gt;
+  &lt;li&gt;Discount factor: 0.90, less than 1 in order to induce curvature in the true value function, making the problem more challenging for function approximators&lt;/li&gt;
+  &lt;li&gt;Policy to evaluate: the optimal policy (found by policy iteration)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;different-mc-algorithms&quot;&gt;Different MC Algorithms&lt;/h3&gt;
+
+&lt;h4 id=&quot;basic-structure&quot;&gt;Basic structure&lt;/h4&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;_&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;range&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;num_episodes&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+  
+  &lt;span class=&quot;c1&quot;&gt;# states and rewards are two lists
+&lt;/span&gt;  &lt;span class=&quot;c1&quot;&gt;# rewards[t] is the immediate reward of taking the action given by the policy in state[t]
+&lt;/span&gt;  
+  &lt;span class=&quot;n&quot;&gt;states&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;rewards&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;record_one_trajectory&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;  
+  
+  &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;len&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;states&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;# last index
+&lt;/span&gt;  &lt;span class=&quot;n&quot;&gt;G&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;  &lt;span class=&quot;c1&quot;&gt;# return
+&lt;/span&gt;  &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;t&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;range&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;  &lt;span class=&quot;c1&quot;&gt;# T-1, T-2, ..., 1, 0
+&lt;/span&gt;    &lt;span class=&quot;n&quot;&gt;G&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;discount_factor&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;G&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;rewards&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;t&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;value_learner&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;update&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;states&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;t&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;G&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;  &lt;span class=&quot;c1&quot;&gt;# different MC algorithms differ in their value_learner
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h4 id=&quot;value-learner-for-tabular-mc&quot;&gt;Value learner for tabular MC&lt;/h4&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Table&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+
+  &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;__init__&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;state_space_shape&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+    &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sum_of_returns&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;zeros&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;state_space_shape&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;counts&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;zeros&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;state_space_shape&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;1e-5&lt;/span&gt;  &lt;span class=&quot;c1&quot;&gt;# avoid division by zero
+&lt;/span&gt;    
+  &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;update&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;state&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;tuple&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;target&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;float&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sum_of_returns&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;state&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;target&lt;/span&gt;
+    &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;counts&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;state&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;
+    
+  &lt;span class=&quot;o&quot;&gt;@&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;property&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;array&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;s&quot;&gt;&quot;&quot;&quot;Return the learned values.&quot;&quot;&quot;&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sum_of_returns&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;/&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;counts&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h4 id=&quot;value-learner-for-gradient-mc&quot;&gt;Value learner for gradient MC&lt;/h4&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;LinearApproximator&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+
+  &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;__init__&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;lr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;float&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;state_space_shape&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;tuple&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+    &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;lr&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;lr&lt;/span&gt;  &lt;span class=&quot;c1&quot;&gt;# learning rate
+&lt;/span&gt;    &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;fc&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fc&lt;/span&gt;  &lt;span class=&quot;c1&quot;&gt;# feature constructor
+&lt;/span&gt;    &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;w&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;zeros&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;((&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;fc&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;num_features&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+    &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;state_space_shape&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;state_space_shape&lt;/span&gt;
+		
+  &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;calc_v&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;state&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;tuple&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;float&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;float&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;w&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;@&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;fc&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;preprocess&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;state&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+
+  &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;calc_grad_wrt_w&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;state&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;tuple&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;array&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;fc&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;preprocess&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;state&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+  &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;update&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;state&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;tuple&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;target&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;float&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;w&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;lr&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;target&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;calc_v&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;state&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;calc_grad_wrt_w&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;state&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+  &lt;span class=&quot;o&quot;&gt;@&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;property&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;array&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;v&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;zeros&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;state_space_shape&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;row_ix&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;range&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;state_space_shape&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]):&lt;/span&gt;
+      &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;col_ix&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;range&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;state_space_shape&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]):&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;state&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;row_ix&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;col_ix&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;state&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;calc_v&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;state&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;v&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;root-value-error-over-time&quot;&gt;Root value error over time*&lt;/h3&gt;
+
+&lt;p&gt;The root mean squared value error requires the on-policy distribution. While this can be collected during training, I find the errors more meaningful and interpretable when the on-policy distribution is approximated before training happens.&lt;/p&gt;
+
+&lt;iframe src=&quot;/animations/2020-08-31-on-policy-prediction-with-approximation/on_policy_distribution.html&quot; width=&quot;550&quot; height=&quot;520&quot; frameborder=&quot;0&quot; style=&quot;display:block; margin: auto;&quot;&gt;&lt;/iframe&gt;
+
+&lt;figcaption style=&quot;max-width:430px; margin:auto; text-align:center&quot;&gt;&lt;b&gt;Animation 1.&lt;/b&gt; On-policy distribution of the optimal policy.&lt;/figcaption&gt;
+
+&lt;p&gt;Some important observations of the plot below:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Initially, although all gradient MC methods had a learning rate of only 0.01, their errors dropped faster than the tabular MC method.&lt;/li&gt;
+  &lt;li&gt;Between 10 and 100 episodes, the error of the tabular method dropped below the gradient MC method using linear features (due to the &lt;strong&gt;limited representation power of linear features&lt;/strong&gt;).&lt;/li&gt;
+  &lt;li&gt;Finally, right before reaching 1000 episodes, the error of the tabular method dropped below the gradient MC method using Fourier features, despite the fact that Fourier features led to the fastest initial learning.&lt;/li&gt;
+  &lt;li&gt;After 1000 epsiodes, the gradient MC method using polynomial features still won the tabular method.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;img style=&quot;display:block; margin:auto; max-width:400px&quot; src=&quot;/images/2020-08-31-on-policy-prediction-with-approximation/errors_over_time.png&quot; /&gt;&lt;/p&gt;
+&lt;figcaption style=&quot;max-width:450px; margin:auto&quot;&gt;&lt;b&gt;Figure 3.&lt;/b&gt;  Root value error over time for different algorithms.&lt;/figcaption&gt;
+
+&lt;h3 id=&quot;learned-values&quot;&gt;Learned values*&lt;/h3&gt;
+
+&lt;p&gt;&lt;img style=&quot;display:block; margin:auto; max-width:100%&quot; src=&quot;/images/2020-08-31-on-policy-prediction-with-approximation/learned_values.png&quot; /&gt;&lt;/p&gt;
+&lt;figcaption style=&quot;max-width:400px; margin:auto&quot;&gt;&lt;b&gt;Figure 4.&lt;/b&gt;  Values learned by different methods.&lt;/figcaption&gt;</content><author><name>Zhihan Yang</name></author><summary type="html"></summary></entry><entry><title type="html">Rollout Algorithms</title><link href="http://localhost:4000/rl/rollout_algorithms" rel="alternate" type="text/html" title="Rollout Algorithms" /><published>2020-08-26T23:00:00-05:00</published><updated>2020-08-26T23:00:00-05:00</updated><id>http://localhost:4000/rl/rollout-algorithms</id><content type="html" xml:base="http://localhost:4000/rl/rollout_algorithms">&lt;script src=&quot;https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML&quot; type=&quot;text/javascript&quot;&gt;&lt;/script&gt;
 
 &lt;ul id=&quot;markdown-toc&quot;&gt;
   &lt;li&gt;&lt;a href=&quot;#how-they-work&quot; id=&quot;markdown-toc-how-they-work&quot;&gt;How they work?&lt;/a&gt;&lt;/li&gt;

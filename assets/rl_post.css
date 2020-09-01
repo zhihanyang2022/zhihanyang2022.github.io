@@ -33,6 +33,10 @@ p, li {
 	font-size:17.5;
 }
 
+li{
+  margin: 10px 0;
+}
+
 /* both attributes are essential for centering images on posts */
 img {
   display: block; 
