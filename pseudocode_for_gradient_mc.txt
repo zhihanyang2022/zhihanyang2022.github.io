@@ -1,0 +1,37 @@
+Input: pi, a policy to be evaluated
+Input: nn, a differentiable function with randomly initialized weights w
+	loss function, opt optimizer
+Input: env, an environment
+Parameter: alpha, learning rate (included in the nn model)
+Parameter: n, number of episodes to run for
+Parameter: gamma, discount factor
+
+total_losses = []
+
+for n episodes:
+	
+	states = []
+	rewards = []
+	s = starting_state
+	while True:
+		
+		a = policy.act(starting_state)
+		r, s_prime = env.step(starting_state, a)
+		
+		states.append(s)
+		return.append(r)
+
+	return = 0
+	for t in range(T-1, -1, 1):
+		return = gamma * return + rewards[t+1]  # rewards[t+1] is the immediate reward
+		loss = nn(x=state[t], y=return)
+		loss.backward()
+		opt.step()
+
+	run the function approximator on all states to compute the total loss
+	append the total loss to total_losses
+
+plot(total_losses)
+ 
+
+
