@@ -1,0 +1,14 @@
+---
+layout: post
+title:  "Adversarial Bandits for Drawing Generalizable Conclusions in Non-Adversarial Experiments: An Empirical Study"
+date:   2022-12-19 12:00:00 +00:00
+image: /images/adv-bandits-square.png
+categories: research
+author: "Zhihan Yang"
+authors: "<strong>Zhihan Yang</strong>, Shiyue Zhang, Anna Rafferty"
+venue: "EDM (Short Paper)"
+arxiv: https://educationaldatamining.org/edm2022/proceedings/2022.EDM-short-papers.32/2022.EDM-short-papers.32.pdf
+code: http://tiny.cc/MABExpDesign
+website: https://educationaldatamining.org/EDM2022/proceedings/2022.EDM-short-papers.32/
+---
+We empirically analyse how adversarial bandit algorithms can enhance the reliability of conclusions drawn from large-scale educational experiments.

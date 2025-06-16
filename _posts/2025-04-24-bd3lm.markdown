@@ -1,0 +1,14 @@
+---
+layout: post
+title:  "Block Diffusion: Interpolating Between Autoregressive and Diffusion Language Models"
+date:   2025-04-01
+image: /images/bd3lm.png
+categories: research
+author: "Zhihan Yang"
+authors: "Marianne Arriola, Aaron Gokaslan, Justin Chiu, <b>Zhihan Yang</b>, Zhixuan Qi, Jiaqi Han, Subham Sahoo, Volodymyr Kuleshov"
+venue: "ICLR (Oral)"
+arxiv: https://openreview.net/forum?id=tyEyYT267x
+code: https://github.com/kuleshov-group/bd3lms
+website: https://m-arriola.com/bd3lms/
+---
+We introduce a class of block diffusion language models that interpolate between discrete denoising diffusion and autoregressive models.

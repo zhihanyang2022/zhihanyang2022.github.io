@@ -12,4 +12,4 @@ code: https://github.com/s-sahoo/Eso-LMs
 website: https://s-sahoo.com/Eso-LMs/
 twitter: https://x.com/zhihanyang_/status/1929979063634145341
 ---
-First paper to propose KV-caching for diffusion language models.
+We are the first to propose KV-caching for masked diffusion language models.

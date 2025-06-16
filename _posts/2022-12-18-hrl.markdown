@@ -1,0 +1,13 @@
+---
+layout: post
+title:  "Hierarchical Reinforcement Learning under Mixed Observability"
+date:   2022-12-18 12:00:00 +00:00
+image: /images/hrl-mixed-observability-square.png
+categories: research
+author: "Zhihan Yang"
+authors: "Hai Nguyen*, <strong>Zhihan Yang*</strong> (Joint First Authors), Andrea Baisero, Xiao Ma, Robert Platt†, Christopher Amato† (Joint Senior Authors)"
+venue: "WAFR"
+arxiv: https://arxiv.org/abs/2204.00898
+website: https://sites.google.com/view/hilmo-wafr
+---
+We present a hierarchical RL framework that handles mixed observability settings, enabling modular policies that scale to complex robotic tasks.
