@@ -1,0 +1,16 @@
+---
+layout: post
+title:  "Scaling Beyond Masked Diffusion Language Models"
+date:   2025-06-01 22:21:59 +00:00
+image: /images/duo_scaling.png
+categories: research
+author: "Zhihan Yang"
+authors: "Subham Sekhar Sahoo, Jean-Marie Lamercier*, <strong>Zhihan Yang*</strong>, Justin Deschenaux* (Joint Second Authors), Jingyu Liu, John Thickstun, Ante Jukić"
+venue: "arXiv"
+arxiv: https://arxiv.org/abs/2506.01928
+code: https://github.com/s-sahoo/Eso-LMs
+website: https://s-sahoo.com/scaling-dllms/
+twitter: https://x.com/zhihanyang_/status/1929979063634145341
+---
+We demonstrate that uniform-state diffusion could beat masked diffusion on likelihood evaluation benchmarks and GSM8K. I led the full SFT pipeline for AR, MDLM, and Eso-LMs.
+
