@@ -1,6 +1,5 @@
 <!DOCTYPE HTML>
 <html lang="en">
-
 <head>
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-E00L9PT3V9"></script>
@@ -19,8 +18,38 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <link rel="stylesheet" type="text/css" href="/style.css" />
-  <link rel="canonical" href="http://localhost:4000/404.html">
+  <link rel="canonical" href="http://localhost:4000/">
   <link href="https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic" rel="stylesheet" type="text/css">
+
+  <style>
+    #papers-table {
+      border-spacing: 0 16px !important;
+    }
+    #papers-table > tbody > tr > td {
+      background: #ffffff;
+      border-top: 2px solid #e0e0e0;
+      border-bottom: 2px solid #e0e0e0;
+      transition: background 0.2s ease, border-color 0.2s ease;
+    }
+    #papers-table > tbody > tr > td:first-child {
+      border-left: 2px solid #e0e0e0;
+      border-top-left-radius: 12px;
+      border-bottom-left-radius: 12px;
+    }
+    #papers-table > tbody > tr > td:last-child {
+      border-right: 2px solid #e0e0e0;
+      border-top-right-radius: 12px;
+      border-bottom-right-radius: 12px;
+    }
+    #papers-table > tbody > tr:hover > td {
+      background: #f6f8fa;
+      border-color: #ccc;
+    }
+    #papers-table h3 {
+      font-size: 1.2em;
+      margin-bottom: 1.5em;
+    }
+  </style>
 
 </head>
 
@@ -43,7 +72,7 @@
                 <a href="mailto:zhihany@cs.cornell.edu"> Email</a> &nbsp;/&nbsp;
                 <a href="https://github.com/zhihanyang2022">GitHub</a> &nbsp;/&nbsp;
                 <a href="https://scholar.google.com/citations?user=WjinQ20AAAAJ&hl=en">Google Scholar</a> &nbsp;/&nbsp;
-                <a href="https://www.linkedin.com/in/~zy/"> LinkedIn </a>
+                <a href="https://www.linkedin.com/in/zhihanyang/"> LinkedIn </a>
               </p>
             </td>
             <td style="padding:2.5%;width:40%;max-width:40%">
@@ -62,7 +91,7 @@
             </td>
           </tr>
         </table>
-        <table style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;">
+        <table id="papers-table" style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;">
 
           
           
@@ -80,10 +109,15 @@
             <td style="padding:2.5%;width:75%;vertical-align:middle">
               <h3>Scaling Beyond Masked Diffusion Language Models</h3>
               <br>
+              <br>
               Subham Sekhar Sahoo, Jean-Marie Lamercier*, <strong>Zhihan Yang*</strong>, Justin Deschenaux* (Joint Second Authors), Jingyu Liu, John Thickstun, Ante Jukić
 
+				<br>
+
               <br>
-              <em>arXiv</em>, 2025
+              <em>Under review at ICML 2026</em>
+              <br>
+              
               <br>
               
               <a href="https://arxiv.org/abs/2602.15014">arxiv</a> /
@@ -99,6 +133,8 @@
               
               
               <a href="https://x.com/zhihanyang_/status/2023624944928633280">twitter</a> /
+              
+              <a href="https://youtu.be/P66NLbcQ8OE"><b>my talk</b></a>
               
               
               <p></p>
@@ -116,12 +152,17 @@
               <img src="/tn/images/esolm-square.png" alt="project image" style="width:auto; height:auto; max-width:100%;" />
             </td>
             <td style="padding:2.5%;width:75%;vertical-align:middle">
-              <h3>Esoteric Language Models</h3>
+              <h3>Esoteric Language Models: Bridging Autoregressive and Masked Diffusion LLMs</h3>
               <br>
-              Subham Sekhar Sahoo*, <strong>Zhihan Yang*</strong> (Joint First Authors), Yash Akhauri†, Johnna Liu†, Deepansha Singh†, Zhoujun Cheng† (Joint Second Authors), Zhengzhong Liu, Eric Xing, John Thickstun, Arash Vahdat
+              <br>
+              <strong>Zhihan Yang*</strong>, Subham Sekhar Sahoo* (Joint First Authors), Yash Akhauri†, Johnna Liu†, Deepansha Singh†, Zhoujun Cheng† (Joint Second Authors), Zhengzhong Liu, Eric Xing, John Thickstun, Arash Vahdat
+              
+              <br>
 
               <br>
-              <em>arXiv</em>, 2025
+              <em>Under review at ICML 2026, ICLR 2026 - Workshop on Multimodal Intelligence</em>
+              <br>
+              
               <br>
               
               <a href="https://arxiv.org/abs/2506.01928">arxiv</a> /
@@ -138,6 +179,7 @@
               
               <a href="https://x.com/zhihanyang_/status/1929979063634145341">twitter</a> /
               
+              <a href="https://youtu.be/MsCm-aos7jE"><b>my talk</b></a>
               
               <p></p>
               <p>We are the first to propose KV-caching for masked diffusion language models.</p>
@@ -156,10 +198,15 @@
             <td style="padding:2.5%;width:75%;vertical-align:middle">
               <h3>Block Diffusion: Interpolating Between Autoregressive and Diffusion Language Models</h3>
               <br>
+              <br>
               Marianne Arriola, Aaron Gokaslan, Justin Chiu, <b>Zhihan Yang</b>, Zhixuan Qi, Jiaqi Han, Subham Sahoo, Volodymyr Kuleshov
+
+			  <br>
 
               <br>
               <em>ICLR (Oral)</em>, 2025
+              <br>
+              
               <br>
               
               <a href="https://openreview.net/forum?id=tyEyYT267x">arxiv</a> /
@@ -171,7 +218,7 @@
               
               
               
-              <a href="https://m-arriola.com/bd3lms/">website</a> /
+              <a href="https://m-arriola.com/bd3lms/">website</a>
               
               
               
@@ -192,10 +239,13 @@
             <td style="padding:2.5%;width:75%;vertical-align:middle">
               <h3>Adversarial Bandits for Drawing Generalizable Conclusions in Non-Adversarial Experiments: An Empirical Study</h3>
               <br>
+              <br>
               <strong>Zhihan Yang</strong>, Shiyue Zhang, Anna Rafferty
 
+			  <br>
               <br>
               <em>EDM (Short Paper)</em>, 2022
+              <br>
               <br>
               
               <a href="https://educationaldatamining.org/edm2022/proceedings/2022.EDM-short-papers.32/2022.EDM-short-papers.32.pdf">arxiv</a> /
@@ -207,7 +257,7 @@
               
               
               
-              <a href="https://educationaldatamining.org/EDM2022/proceedings/2022.EDM-short-papers.32/">website</a> /
+              <a href="https://educationaldatamining.org/EDM2022/proceedings/2022.EDM-short-papers.32/">website</a>
               
               
               
@@ -228,10 +278,13 @@
             <td style="padding:2.5%;width:75%;vertical-align:middle">
               <h3>Hierarchical Reinforcement Learning under Mixed Observability</h3>
               <br>
+              <br>
               Hai Nguyen*, <strong>Zhihan Yang*</strong> (Joint First Authors), Andrea Baisero, Xiao Ma, Robert Platt†, Christopher Amato† (Joint Senior Authors)
 
+			  <br>
               <br>
               <em>WAFR</em>, 2022
+              <br>
               <br>
               
               <a href="https://arxiv.org/abs/2204.00898">arxiv</a> /
@@ -241,7 +294,7 @@
               
               
               
-              <a href="https://sites.google.com/view/hilmo-wafr">website</a> /
+              <a href="https://sites.google.com/view/hilmo-wafr">website</a>
               
               
               
@@ -262,17 +315,20 @@
             <td style="padding:2.5%;width:75%;vertical-align:middle">
               <h3>Recurrent Off-policy Baselines for Memory-based Continuous Control</h3>
               <br>
+              <br>
               <strong>Zhihan Yang</strong>*, Hai Nguyen* (Joint First Authors)
-
+	
+			  <br>
               <br>
               <em>Deep RL Workshop @ NeurIPS</em>, 2021
+              <br>
               <br>
               
               <a href="https://arxiv.org/abs/2110.12628">arxiv</a> /
               
               
               
-              <a href="https://github.com/zhihanyang2022/off-policy-continuous-control">code</a> /
+              <a href="https://github.com/zhihanyang2022/off-policy-continuous-control">code</a>
               
               
               
@@ -296,13 +352,16 @@
             <td style="padding:2.5%;width:75%;vertical-align:middle">
               <h3>Game Level Clustering and Generation using Gaussian Mixture VAEs</h3>
               <br>
+              <br>
               <strong>Zhihan Yang</strong>, Anurag Sarkar, Seth Cooper
 
+			  <br>
               <br>
               <em>AIIDE (Oral)</em>, 2020
               <br>
+              <br>
               
-              <a href="https://arxiv.org/abs/2009.09811">arxiv</a> /
+              <a href="https://arxiv.org/abs/2009.09811">arxiv</a>
               
               
               
