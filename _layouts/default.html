@@ -1,5 +1,6 @@
 <!DOCTYPE HTML>
 <html lang="en">
+
 <head>
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-E00L9PT3V9"></script>
@@ -20,72 +21,213 @@
 
   <link rel="stylesheet" type="text/css" href="/style.css" />
   <link rel="canonical" href="http://localhost:4000/">
-  <link href="https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic" rel="stylesheet" type="text/css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
 
   <style>
-    body {
-      background-color: #f5f6f8;
-      background-image: radial-gradient(circle, #d8dbe2 1px, transparent 1px);
-      background-size: 24px 24px;
+    /* Card shadows are factored out because box-shadow replaces rather than
+       accumulates: the glass panel has to restate the drop shadow alongside
+       its inset edges, or it loses the shadow entirely. */
+    :root {
+      --card-shadow: 0 1px 2px rgba(16, 24, 40, 0.04),
+                     0 4px 12px rgba(16, 24, 40, 0.06);
+      --card-shadow-hover: 0 2px 4px rgba(16, 24, 40, 0.05),
+                           0 12px 28px rgba(16, 24, 40, 0.10);
+      --glass-edge: inset 1px 1px 0 rgba(255, 255, 255, 0.75),
+                    inset -1px -1px 0 rgba(255, 255, 255, 0.25);
     }
+
+    body {
+      background-color: #f7f8fa;
+      background-image: radial-gradient(circle, #dcdfe6 1px, transparent 1px);
+      background-size: 22px 22px;
+    }
+
+    /* Publication cards.
+       Card gap must stay clearly larger than the ~25px blank line that the
+       <br><br> pairs create inside a card, or the grouping reads inverted. */
     #papers-table {
-      border-spacing: 0 28px !important;
+      border-spacing: 0 44px !important;
+      /* border-spacing also adds 44px above the first card and below the last;
+         pull those back so the gap to the intro sentence matches the 20px
+         rhythm used under the News heading. */
+      margin-top: -24px;
+      margin-bottom: -24px;
     }
     #papers-table > tbody > tr > td {
       background: #ffffff;
+      /* Blank lines inside a card come from <br><br> pairs, and an empty line
+         box is sized by the strut (this cell's line-height). 1.65 -> 1.32 is
+         a 20% shorter gap. The summary <p> restores 1.65 below. */
+      line-height: 1.32;
       border-top: none;
       border-bottom: none;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08), 0 0 1px rgba(0, 0, 0, 0.1);
+      box-shadow: var(--card-shadow);
       transition: box-shadow 0.25s ease, transform 0.25s ease;
     }
     #papers-table > tbody > tr > td:first-child {
       border-left: none;
-      border-top-left-radius: 10px;
-      border-bottom-left-radius: 10px;
+      border-top-left-radius: 12px;
+      border-bottom-left-radius: 12px;
     }
     #papers-table > tbody > tr > td:last-child {
       border-right: none;
-      border-top-right-radius: 10px;
-      border-bottom-right-radius: 10px;
+      border-top-right-radius: 12px;
+      border-bottom-right-radius: 12px;
+    }
+    /* Frosted-glass right panel: translucent fill + blurred backdrop, so the
+       page's dot pattern diffuses through it. The inset highlight on the top
+       and left edges is what sells it as a pane of glass. */
+    #papers-table > tbody > tr > td:last-child {
+      background: linear-gradient(145deg,
+                                  rgba(255, 255, 255, 0.72),
+                                  rgba(255, 255, 255, 0.42));
+      -webkit-backdrop-filter: blur(14px) saturate(165%);
+      backdrop-filter: blur(14px) saturate(165%);
+      box-shadow: var(--glass-edge), var(--card-shadow);
+    }
+    /* Browsers without backdrop-filter fall back to the solid panel */
+    @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+      #papers-table > tbody > tr > td:last-child {
+        background: #ffffff;
+      }
     }
     #papers-table > tbody > tr:hover > td {
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12), 0 0 1px rgba(0, 0, 0, 0.1);
-      transform: translateY(-3px);
+      box-shadow: var(--card-shadow-hover);
+      transform: translateY(-2px);
+    }
+    /* Keep the glass edge on hover; this rule must out-specify the one above */
+    #papers-table > tbody > tr:hover > td:last-child {
+      box-shadow: var(--glass-edge), var(--card-shadow-hover);
     }
     #papers-table h3 {
       font-size: 1.2em;
+      letter-spacing: -0.02em;
       margin-bottom: 1.5em;
+    }
+    /* Author list + venue: quieter than the title, so the title leads */
+    #papers-table > tbody > tr > td:last-child {
+      color: var(--text-muted);
+    }
+    #papers-table h3,
+    #papers-table strong,
+    #papers-table b {
+      color: var(--text);
+    }
+    #papers-table a {
+      color: var(--link);
+      font-weight: 500;
+    }
+    /* <b> inside a link (e.g. "my talk") must keep the link colour, not the
+       dark body colour from the rule above */
+    #papers-table a b,
+    #papers-table a strong {
+      color: inherit;
+    }
+    #papers-table a:hover {
+      color: var(--link-hover);
+    }
+    #papers-table em {
+      color: #39404b;
+      font-style: normal;
+      font-weight: 500;
+    }
+    #papers-table p {
+      color: var(--text-muted);
+      line-height: 1.65;
+      margin-bottom: 0;
+    }
+    #papers-table img {
+      border-radius: 6px;
     }
     .me {
       color: #e67e22;
+      font-weight: 600;
+    }
+
+    /* Separator between links (en dash) */
+    .sep {
+      color: #c4c9d2;
+      margin: 0 6px;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    /* Social links: sized to sit on one line in the narrow left column */
+    #social-links,
+    #social-links a {
+      font-size: 13px;
+    }
+    #social-links .sep {
+      margin: 0 5px;
+    }
+
+    /* News */
+    #news-list {
+      padding-left: 20px;
+    }
+    #news-list li {
+      margin-bottom: 7px;
+      padding-left: 2px;
+    }
+    #news-list li::marker {
+      color: #aab1bd;
+    }
+
+    /* Section headings get a hairline rule under them */
+    .section-heading {
+      display: block !important;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #e3e6eb;
+    }
+
+    /* Narrow screens: let the two-column rows stack instead of squeezing */
+    @media (max-width: 640px) {
+      #intro-table > tbody > tr > td,
+      #papers-table > tbody > tr > td {
+        display: block;
+        width: auto !important;
+        max-width: none !important;
+      }
+      #papers-table > tbody > tr > td:first-child {
+        border-radius: 12px 12px 0 0;
+        text-align: center;
+        padding-bottom: 0 !important;
+      }
+      #papers-table > tbody > tr > td:last-child {
+        border-radius: 0 0 12px 12px;
+      }
+      #papers-table > tbody > tr > td:first-child img {
+        max-width: 220px;
+      }
+      h1 { font-size: 27px; }
     }
   </style>
-
 </head>
 
 <body>
-  <table style="width:100%;max-width:800px;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;">
+  <table style="width:100%;max-width:960px;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;">
     <tr style="padding:0px">
       <td style="padding:0px">
-        <table style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;">
+
+        <!-- Intro -->
+        <table id="intro-table" style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;">
           <tr style="padding:0px">
             <td style="padding:4% 2.5%;width:35%;max-width:35%;vertical-align:middle;text-align:center;">
               <img style="width:100%;max-width:200px;border-radius:50%;border:3px solid #d0d7de;box-shadow:0 4px 12px rgba(0,0,0,0.1);display:block;margin:0 auto 16px auto;" alt="profile photo" src="images/Yang_Zhihan_Photo.jpg">
               <h1 id="name-text" style="margin:0 0 4px 0;">
                 Zhihan Yang
               </h1>
-              <p style="margin:4px 0 12px 0;color:#555;font-size:0.95em;">ML PhD Candidate, Cornell CS</p>
-              <p style="text-align:center;margin:0;">
-                <a href="mailto:zhihany@cs.cornell.edu">Email</a> &nbsp;/&nbsp;
-                <a href="https://github.com/zhihanyang2022">GitHub</a> &nbsp;/&nbsp;
-                <a href="https://scholar.google.com/citations?user=WjinQ20AAAAJ&hl=en">Scholar</a> &nbsp;/&nbsp;
-                <a href="https://www.linkedin.com/in/zhihanyang/">LinkedIn</a>
+              <p style="margin:4px 0 14px 0;color:#5b6370;font-size:0.95em;letter-spacing:0.01em;">ML PhD Candidate, Cornell CS</p>
+              <p id="social-links" style="text-align:center;margin:0;font-weight:500;">
+                <a href="mailto:zhihany@cs.cornell.edu">Email</a><span class="sep">&ndash;</span><a href="https://github.com/zhihanyang2022">GitHub</a><span class="sep">&ndash;</span><a href="https://scholar.google.com/citations?user=WjinQ20AAAAJ&hl=en">Scholar</a><span class="sep">&ndash;</span><a href="https://www.linkedin.com/in/zhihanyang/">LinkedIn</a>
               </p>
             </td>
             <td style="padding:4% 2.5%;width:65%;vertical-align:middle">
               <p>I'm a 3rd-year PhD candidate at <a href="https://www.cs.cornell.edu/">Cornell CS</a>, where I'm fortunate to be advised by <a href="https://johnthickstun.com/">Prof. John Thickstun</a> on machine learning and generative models.
               </p>
-              <p>I'm interning at <a href="https://research.nvidia.com/labs/genair/">NVIDIA GenAIR</a>. I interned at <a href="https://ifm.ai/">MBZUAI Institute of Foundation Models</a> working with <a href="https://hunterhector.github.io/">Hector Liu</a> and <a href="https://s-sahoo.com/">Subham Sahoo</a> (Summer 2024).</p>
+              <p>I'm interning at <a href="https://research.nvidia.com/labs/genair/">NVIDIA Fundamental GenAI Research</a>. I interned at <a href="https://ifm.ai/">MBZUAI Institute of Foundation Models</a> working with <a href="https://hunterhector.github.io/">Hector Liu</a> and <a href="https://s-sahoo.com/">Subham Sahoo</a> (Summer 2024).</p>
               <hr style="border:none;height:1px;background:linear-gradient(to right, transparent, #d0d7de, transparent);margin:10px 0;">
               <p>I have a <b>BA in Mathematics</b> and a <b>BA in Statistics</b> from <a href="https://www.carleton.edu/math/">Carleton College</a>. During those years, I was fortunate to work with <a href="http://www.sethcooper.net/">Seth Cooper</a> on generative models, <a href="https://sites.google.com/site/annanrafferty/">Anna Rafferty</a> on bandits, <a href="https://www.khoury.northeastern.edu/home/camato/">Christopher Amato</a> on deep RL, and <a href="https://aloy.rbind.io/">Adam Loy</a> and <a href="https://www.clairekelling.com/">Claire Kelling</a> on MCMC algorithms and Gaussian Processes.
               </p>
@@ -93,60 +235,49 @@
             </td>
           </tr>
         </table>
-        
-        <br>
-        <h2 style="margin-top:36px;margin-bottom:20px;">News</h2>
-        <ul style="margin-top:16px;margin-bottom:24px;">
-		  <li><b>2026/09</b>: RePlaid accepted at <b>NeurIPS 2026</b>. See you in Atlanta!</li>
+
+        <!-- News -->
+        <h2 class="section-heading" style="margin-top:12px;margin-bottom:20px;">News</h2>
+        <ul id="news-list" style="margin-top:16px;margin-bottom:24px;">
+          <li><b>2026/09</b>: RePlaid accepted at <b>NeurIPS 2026</b>. See you in Atlanta!</li>
           <li><b>2026/07</b>: RePlaid accepted as <span style="color:red">Oral</span> at <b>COLM 2026</b> - Workshop on Non-Autoregressive Language Models. See you in SF!</li>
           <li><b>2026/04</b>: Esoteric Language Models accepted at <b>ICML 2026</b>. See you in Korea!</li>
-		  <li><b>2026/03</b>: Started my research internship at <b>NVIDIA GenAIR</b>.</li>
-		  <li><b>2026/03</b>: Esoteric Language Models accepted as <span style="color:red">Oral</span> at <b>ICLR 2026</b> - Workshop on Multi-Modal Intelligence. See you in Rio!</li>
-		  <li><b>2025/05</b>: Started my research internship at <b>MBZUAI Institute of Foundation Models</b>.</li>
+          <li><b>2026/03</b>: Started my research internship at <b>NVIDIA Fundamental GenAI Research</b>.</li>
+          <li><b>2026/03</b>: Esoteric Language Models accepted as <span style="color:red">Oral</span> at <b>ICLR 2026</b> - Workshop on Multi-Modal Intelligence. See you in Rio!</li>
+          <li><b>2025/05</b>: Started my research internship at <b>MBZUAI Institute of Foundation Models</b>.</li>
         </ul>
 
-        <h2 style="margin-top:36px;margin-bottom:20px;">Publications</h2>
-        <br>
-        <br>
-        <p style="margin-top:0;margin-bottom:24px;">I specialize in developing principled, controllable and efficient generative models for various modalities.</p>
+        <!-- Publications -->
+        <h2 class="section-heading" style="margin-top:36px;margin-bottom:20px;">Publications</h2>
+        <p style="margin-top:0;margin-bottom:0;">I specialize in developing principled, controllable and efficient generative models for various modalities.</p>
 
         <table id="papers-table" style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;">
 
-	<tr>
+          <tr>
             <td style="padding:2.5%;width:25%;vertical-align:middle;min-width:120px">
-              <img src="/tn/images/replaid.png" alt="project image" style="width:auto; height:auto; max-width:100%;" />
+              <img src="/tn/images/sigma.png" alt="project image" style="width:auto; height:auto; max-width:100%;" />
             </td>
             <td style="padding:2.5%;width:75%;vertical-align:middle">
               <h3>Large Language Continuous Diffusion Models</h3>
               <br>
               <br>
-              <strong class="me">Zhihan Yang*</strong>, Wei Guo*, Jean-Marie Lemercier*, Simon Welker* (Core Contributors), Yonggan Fu, Mohammad Mahdi Kamani, Sajad Norouzi, Julius Berner, Tomas Geffner, Karsten Kreis, Yongxin Chen, Molei Tao, John Thickstun, Pavlo Molchanov, Ante Jukić,  Arash Vahdat&dagger;, Morteza Mardani&dagger; (Joint Senior Authors)
-
-					<br>
-
+              <strong class="me">Zhihan Yang*</strong>, Wei Guo*, Jean-Marie Lemercier*, Simon Welker* (Core Contributors),<br>Yonggan Fu, Mohammad Mahdi Kamani, Sajad Norouzi, Julius Berner, Tomas Geffner, Karsten Kreis, Yongxin Chen, Molei Tao, John Thickstun, Pavlo Molchanov, Ante Jukić,  Arash Vahdat&dagger;, Morteza Mardani&dagger; (Joint Senior Authors)
               <br>
-              <em>Technical Report</em>
               <br>
-
+              <em>NVIDIA Research Technical Report</em>
               <br>
-
-              <a href="https://arxiv.org/abs/2605.18530">arxiv</a> /
-
-              <!-- <a href="https://zhihanyang2022.github.io/replaid/">website</a> / -->
-
-			  <!-- <a href="https://research.nvidia.com/labs/genair/replaid/">NV research page</a> / -->
-
-              <!-- <a href="https://drive.google.com/file/d/1gs9t4UqeIcdHp1hsNzRzpcZyBk18Lcox/view?usp=sharing">COLM version</a> / -->
-
+              <br>
+              <a href="https://arxiv.org/abs/2605.18530">arXiv</a> <span class="sep">&ndash;</span>
+              <!-- <a href="https://zhihanyang2022.github.io/replaid/">website</a> <span class="sep">&ndash;</span> -->
+              <!-- <a href="https://research.nvidia.com/labs/genair/replaid/">NVIDIA research page</a> <span class="sep">&ndash;</span> -->
+              <!-- <a href="https://drive.google.com/file/d/1gs9t4UqeIcdHp1hsNzRzpcZyBk18Lcox/view?usp=sharing">COLM version</a> <span class="sep">&ndash;</span> -->
               <!-- <a href="https://www.youtube.com/watch?v=0wBh6A0ESh8"><b>my talk</b></a> -->
-
               <p></p>
               <p>We present Sigma, the first large-scale (3B/8B) continuous diffusion language model that is competitive with state-of-the-art discrete counterparts in performance.</p>
-
             </td>
           </tr>
 
-<tr>
+          <tr>
             <td style="padding:2.5%;width:25%;vertical-align:middle;min-width:120px">
               <img src="/tn/images/replaid.png" alt="project image" style="width:auto; height:auto; max-width:100%;" />
             </td>
@@ -155,35 +286,20 @@
               <br>
               <br>
               <strong class="me">Zhihan Yang</strong>, Wei Guo, Shuibai Zhang, Subham Sekhar Sahoo, Yongxin Chen, Arash Vahdat, Morteza Mardani&dagger;, John Thickstun&dagger; (Joint Senior Authors)
-
-					<br>
-
+              <br>
               <br>
               <em>NeurIPS 2026, <span style="color:red">Oral</span> at COLM 2026 - Workshop on Non-Autoregressive Language Models</em>
               <br>
-
               <br>
-
-              <a href="https://arxiv.org/abs/2605.18530">arxiv</a> /
-
-
-              <a href="https://zhihanyang2022.github.io/replaid/">website</a> /
-
-			  <a href="https://research.nvidia.com/labs/genair/replaid/">NV research page</a> /
-
-              <a href="https://drive.google.com/file/d/1gs9t4UqeIcdHp1hsNzRzpcZyBk18Lcox/view?usp=sharing">COLM version</a> /
-
+              <a href="https://arxiv.org/abs/2605.18530">arXiv</a> <span class="sep">&ndash;</span>
+              <a href="https://zhihanyang2022.github.io/replaid/">website</a> <span class="sep">&ndash;</span>
+              <a href="https://research.nvidia.com/labs/genair/replaid/">NVIDIA research page</a> <span class="sep">&ndash;</span>
+              <a href="https://drive.google.com/file/d/1gs9t4UqeIcdHp1hsNzRzpcZyBk18Lcox/view?usp=sharing">COLM version</a> <span class="sep">&ndash;</span>
               <a href="https://www.youtube.com/watch?v=0wBh6A0ESh8"><b>my talk</b></a>
-
               <p></p>
               <p>We establish the first scaling law for continuous DLMs that rivals discrete DLMs, along with their first positive signal on reasoning.</p>
-
             </td>
           </tr>
-
-
-
-
 
           <tr>
             <td style="padding:2.5%;width:25%;vertical-align:middle;min-width:120px">
@@ -194,31 +310,18 @@
               <br>
               <br>
               Shuibai Zhang*, Caspian Zhuang*, Chihan Cui*, <strong class="me">Zhihan Yang</strong>, Zhangzhi Peng, Yanxin Zhang, Haoyue Bai, Zack Jia, Yang Zhou, Guanhua Chen, Ming Liu
-
-				<br>
-
+              <br>
               <br>
               <em>COLM 2026</em>
               <br>
-              
               <br>
-
- <a href="https://arxiv.org/abs/2604.01622">arxiv</a> /
-              
-              
-              
+              <a href="https://arxiv.org/abs/2604.01622">arXiv</a> <span class="sep">&ndash;</span>
               <a href="https://github.com/zhangshuibai/EC-DLM">code</a>
-              
               <p></p>
               <p>We establish EC routing as a superior paradigm for DLM MoE models.</p>
-
             </td>
           </tr>
-          
-          
-          
-          
-          
+
           <tr>
             <td style="padding:2.5%;width:25%;vertical-align:middle;min-width:120px">
               <img src="/tn/images/duo_scaling.png" alt="project image" style="width:auto; height:auto; max-width:100%;" />
@@ -228,42 +331,21 @@
               <br>
               <br>
               Subham Sekhar Sahoo, Jean-Marie Lamercier*, <strong class="me">Zhihan Yang*</strong>, Justin Deschenaux* (Joint Second Authors), Jingyu Liu, John Thickstun, Ante Jukić
-
-				<br>
-
+              <br>
               <br>
               <em>ICML 2026</em>
               <br>
-              
               <br>
-              
-              <a href="https://arxiv.org/abs/2602.15014">arxiv</a> /
-              
-              
-              
-              <a href="https://github.com/s-sahoo/scaling-dllms">code</a> /
-              
-              
-              
-              
-              <a href="https://s-sahoo.com/scaling-dllms/">website</a> /
-              
-              
-              <a href="https://x.com/zhihanyang_/status/2023624944928633280">twitter</a> /
-              
+              <a href="https://arxiv.org/abs/2602.15014">arXiv</a> <span class="sep">&ndash;</span>
+              <a href="https://github.com/s-sahoo/scaling-dllms">code</a> <span class="sep">&ndash;</span>
+              <a href="https://s-sahoo.com/scaling-dllms/">website</a> <span class="sep">&ndash;</span>
+              <a href="https://x.com/zhihanyang_/status/2023624944928633280">twitter</a> <span class="sep">&ndash;</span>
               <a href="https://youtu.be/P66NLbcQ8OE"><b>my talk</b></a>
-              
-              
               <p></p>
               <p>We demonstrate that uniform-state diffusion could beat masked diffusion on likelihood evaluation benchmarks and GSM8K. I led the full SFT pipeline for AR, MDLM, and Eso-LMs.</p>
-
             </td>
           </tr>
-          
-          
-          
-          
-          
+
           <tr>
             <td style="padding:2.5%;width:25%;vertical-align:middle;min-width:120px">
               <img src="/tn/images/esolm-square.png" alt="project image" style="width:auto; height:auto; max-width:100%;" />
@@ -274,42 +356,21 @@
               <br>
               <br>
               <strong class="me">Zhihan Yang*</strong>, Subham Sekhar Sahoo* (Joint First Authors), Yash Akhauri†, Johnna Liu†, Deepansha Singh†, Zhoujun Cheng† (Joint Second Authors), Zhengzhong Liu, Eric Xing, John Thickstun, Arash Vahdat
-              
               <br>
-
               <br>
               <em>ICML 2026, <span style="color:red">Oral</span> at ICLR 2026 - Workshop on Multimodal Intelligence</em>
               <br>
-              
               <br>
-              
-              <a href="https://arxiv.org/abs/2506.01928">arxiv</a> /
-              
-              
-              
-              <a href="https://github.com/s-sahoo/Eso-LMs">code</a> /
-              
-              
-              
-              
-              
-              <a href="https://s-sahoo.com/Eso-LMs/">website</a> /
-              
-              
-              <a href="https://x.com/zhihanyang_/status/1929979063634145341">twitter</a> /
-              
+              <a href="https://arxiv.org/abs/2506.01928">arXiv</a> <span class="sep">&ndash;</span>
+              <a href="https://github.com/s-sahoo/Eso-LMs">code</a> <span class="sep">&ndash;</span>
+              <a href="https://s-sahoo.com/Eso-LMs/">website</a> <span class="sep">&ndash;</span>
+              <a href="https://x.com/zhihanyang_/status/1929979063634145341">twitter</a> <span class="sep">&ndash;</span>
               <a href="https://youtu.be/MsCm-aos7jE"><b>my talk</b></a>
-              
               <p></p>
               <p>We are the first to propose exact KV-caching and exact likelihood for masked diffusion language models.</p>
-
             </td>
           </tr>
-          
-          
-          
-          
-          
+
           <tr>
             <td style="padding:2.5%;width:25%;vertical-align:middle;min-width:120px">
               <img src="/tn/images/bd3lm.png" alt="project image" style="width:auto; height:auto; max-width:100%;" />
@@ -320,39 +381,19 @@
               <br>
               <br>
               Marianne Arriola, Aaron Gokaslan, Justin Chiu, <b class="me">Zhihan Yang</b>, Zhixuan Qi, Jiaqi Han, Subham Sahoo, Volodymyr Kuleshov
-
-			  <br>
-
+              <br>
               <br>
               <em>ICLR (<span style="color:red">Oral</span>)</em>, 2025
               <br>
-              
               <br>
-              
-              <a href="https://openreview.net/forum?id=tyEyYT267x">arxiv</a> /
-              
-              
-              
-              <a href="https://github.com/kuleshov-group/bd3lms">code</a> /
-              
-              
-              
-              
-              
+              <a href="https://openreview.net/forum?id=tyEyYT267x">arXiv</a> <span class="sep">&ndash;</span>
+              <a href="https://github.com/kuleshov-group/bd3lms">code</a> <span class="sep">&ndash;</span>
               <a href="https://m-arriola.com/bd3lms/">website</a>
-              
-              
-              
               <p></p>
               <p>We introduce a class of block diffusion language models that interpolate between discrete denoising diffusion and autoregressive models.</p>
-
             </td>
           </tr>
-          
-          
-          
-          
-          
+
           <tr>
             <td style="padding:2.5%;width:25%;vertical-align:middle;min-width:120px">
               <img src="/tn/images/adv-bandits-square.png" alt="project image" style="width:auto; height:auto; max-width:100%;" />
@@ -362,36 +403,19 @@
               <br>
               <br>
               <strong class="me">Zhihan Yang</strong>, Shiyue Zhang, Anna Rafferty
-
-			  <br>
+              <br>
               <br>
               <em>EDM (Short Paper)</em>, 2022
               <br>
               <br>
-              
-              <a href="https://educationaldatamining.org/edm2022/proceedings/2022.EDM-short-papers.32/2022.EDM-short-papers.32.pdf">arxiv</a> /
-              
-              
-              
-              <a href="http://tiny.cc/MABExpDesign">code</a> /
-              
-              
-              
-              
+              <a href="https://educationaldatamining.org/edm2022/proceedings/2022.EDM-short-papers.32/2022.EDM-short-papers.32.pdf">arXiv</a> <span class="sep">&ndash;</span>
+              <a href="http://tiny.cc/MABExpDesign">code</a> <span class="sep">&ndash;</span>
               <a href="https://educationaldatamining.org/EDM2022/proceedings/2022.EDM-short-papers.32/">website</a>
-              
-              
-              
               <p></p>
               <p>We empirically analyse how adversarial bandit algorithms can enhance the reliability of conclusions drawn from large-scale educational experiments.</p>
-
             </td>
           </tr>
-          
-          
-          
-          
-          
+
           <tr>
             <td style="padding:2.5%;width:25%;vertical-align:middle;min-width:120px">
               <img src="/tn/images/hrl-mixed-observability-square.png" alt="project image" style="width:auto; height:auto; max-width:100%;" />
@@ -401,34 +425,18 @@
               <br>
               <br>
               Hai Nguyen*, <strong class="me">Zhihan Yang*</strong> (Joint First Authors), Andrea Baisero, Xiao Ma, Robert Platt†, Christopher Amato† (Joint Senior Authors)
-
-			  <br>
+              <br>
               <br>
               <em>WAFR</em>, 2022
               <br>
               <br>
-              
-              <a href="https://arxiv.org/abs/2204.00898">arxiv</a> /
-              
-              
-              
-              
-              
-              
+              <a href="https://arxiv.org/abs/2204.00898">arXiv</a> <span class="sep">&ndash;</span>
               <a href="https://sites.google.com/view/hilmo-wafr">website</a>
-              
-              
-              
               <p></p>
               <p>We present a hierarchical RL framework that handles mixed observability settings, enabling modular policies that scale to complex robotic tasks.</p>
-
             </td>
           </tr>
-          
-          
-          
-          
-          
+
           <tr>
             <td style="padding:2.5%;width:25%;vertical-align:middle;min-width:120px">
               <img src="/tn/images/robc-square.png" alt="project image" style="width:auto; height:auto; max-width:100%;" />
@@ -439,35 +447,18 @@
               <br>
               <br>
               <strong class="me">Zhihan Yang</strong>*, Hai Nguyen* (Joint First Authors)
-	
-			  <br>
+              <br>
               <br>
               <em>Deep RL Workshop @ NeurIPS</em>, 2021
               <br>
               <br>
-              
-              <a href="https://arxiv.org/abs/2110.12628">arxiv</a> /
-              
-              
-              
+              <a href="https://arxiv.org/abs/2110.12628">arXiv</a> <span class="sep">&ndash;</span>
               <a href="https://github.com/zhihanyang2022/off-policy-continuous-control">code</a>
-              
-              
-              
-              
-              
-              
-              
               <p></p>
               <p>We establish strong recurrent off-policy baselines for tasks requiring long-term memory.</p>
-
             </td>
           </tr>
-          
-          
-          
-          
-          
+
           <tr>
             <td style="padding:2.5%;width:25%;vertical-align:middle;min-width:120px">
               <img src="/tn/images/game-level-clustering-square.png" alt="project image" style="width:auto; height:auto; max-width:100%;" />
@@ -477,165 +468,122 @@
               <br>
               <br>
               <strong class="me">Zhihan Yang</strong>, Anurag Sarkar, Seth Cooper
-
-			  <br>
+              <br>
               <br>
               <em>AIIDE (<span style="color:red">Oral</span>)</em>, 2020
               <br>
               <br>
-              
-              <a href="https://arxiv.org/abs/2009.09811">arxiv</a>
-              
-              
-              
-              
-              
-              
-              
-              
+              <a href="https://arxiv.org/abs/2009.09811">arXiv</a>
               <p></p>
               <p>We leverage the Gaussian-Mixture VAE framework to cluster game levels in an unsupervised manner and synthesize novel game levels from the learned clusters.</p>
-
             </td>
           </tr>
-          
-          
-          
+
         </table>
+
         <br>
         <br>
         <br>
+
+        <!-- Other projects -->
         <table style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;">
           <tr>
             <td style="padding:2.5%;width:100%;vertical-align:middle">
-              <h2>Other Projects</h2>
+              <h2 class="section-heading">Other Projects</h2>
               <p>Upcoming.
               </p>
             </td>
           </tr>
         </table>
+
         <table style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;">
-
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
         </table>
+
         <br>
         <br>
         <br>
 
-
+        <!-- Footer -->
         <table style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;">
           <tr>
             <td style="padding:0px">
               <br>
-              <p style="text-align:center;font-size:small;">
-                Design and source code from <a style="font-size:small;" href="https://jonbarron.info">Jon Barron's website</a>
+              <p style="text-align:center;font-size:small;color:#8a919e;">
+                Design and source code modified from <a style="font-size:small;" href="https://jonbarron.info">Jon Barron's website</a>
               </p>
-              <p style="text-align:center;font-size:small;">
+              <p style="text-align:center;font-size:small;color:#8a919e;">
                 &copy; All rights reserved by Zhihan Yang
               </p>
             </td>
           </tr>
         </table>
+
       </td>
     </tr>
   </table>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  var el = document.getElementById('name-text');
-  if (!el) return;
 
-  var textNodes = [];
-  var walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null, false);
-  while (walker.nextNode()) {
-    var node = walker.currentNode;
-    if (node.textContent.trim().length > 0) {
-      var thresholds = [];
-      for (var i = 0; i < node.textContent.length; i++) {
-        thresholds.push(Math.random());
-      }
-      textNodes.push({ node: node, original: node.textContent, thresholds: thresholds });
-    }
-  }
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var el = document.getElementById('name-text');
+      if (!el) return;
 
-  var pool = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  var totalSteps = 10;
-  var stepMs = 75;
-  var step = 0;
-
-  // Start fully scrambled
-  textNodes.forEach(function(entry) {
-    var s = '';
-    for (var i = 0; i < entry.original.length; i++) {
-      var ch = entry.original[i];
-      if (ch === ' ' || ch === '\n' || ch === '\t') { s += ch; }
-      else { s += pool[Math.floor(Math.random() * pool.length)]; }
-    }
-    entry.node.textContent = s;
-  });
-
-  var interval = setInterval(function() {
-    step++;
-    var progress = step / totalSteps;
-
-    textNodes.forEach(function(entry) {
-      var s = '';
-      for (var i = 0; i < entry.original.length; i++) {
-        var ch = entry.original[i];
-        if (ch === ' ' || ch === '\n' || ch === '\t') {
-          s += ch;
-        } else if (entry.thresholds[i] < progress) {
-          s += ch;
-        } else {
-          s += pool[Math.floor(Math.random() * pool.length)];
+      var textNodes = [];
+      var walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null, false);
+      while (walker.nextNode()) {
+        var node = walker.currentNode;
+        if (node.textContent.trim().length > 0) {
+          var thresholds = [];
+          for (var i = 0; i < node.textContent.length; i++) {
+            thresholds.push(Math.random());
+          }
+          textNodes.push({ node: node, original: node.textContent, thresholds: thresholds });
         }
       }
-      entry.node.textContent = s;
-    });
 
-    if (step >= totalSteps) {
-      clearInterval(interval);
+      var pool = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      var totalSteps = 10;
+      var stepMs = 75;
+      var step = 0;
+
+      // Start fully scrambled
       textNodes.forEach(function(entry) {
-        entry.node.textContent = entry.original;
+        var s = '';
+        for (var i = 0; i < entry.original.length; i++) {
+          var ch = entry.original[i];
+          if (ch === ' ' || ch === '\n' || ch === '\t') { s += ch; }
+          else { s += pool[Math.floor(Math.random() * pool.length)]; }
+        }
+        entry.node.textContent = s;
       });
-    }
-  }, stepMs);
-});
-</script>
+
+      var interval = setInterval(function() {
+        step++;
+        var progress = step / totalSteps;
+
+        textNodes.forEach(function(entry) {
+          var s = '';
+          for (var i = 0; i < entry.original.length; i++) {
+            var ch = entry.original[i];
+            if (ch === ' ' || ch === '\n' || ch === '\t') {
+              s += ch;
+            } else if (entry.thresholds[i] < progress) {
+              s += ch;
+            } else {
+              s += pool[Math.floor(Math.random() * pool.length)];
+            }
+          }
+          entry.node.textContent = s;
+        });
+
+        if (step >= totalSteps) {
+          clearInterval(interval);
+          textNodes.forEach(function(entry) {
+            entry.node.textContent = entry.original;
+          });
+        }
+      }, stepMs);
+    });
+  </script>
 </body>
 
 </html>
-
