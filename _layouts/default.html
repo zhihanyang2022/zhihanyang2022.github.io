@@ -38,6 +38,10 @@
                     inset -1px -1px 0 rgba(255, 255, 255, 0.25);
     }
 
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
       background-color: #f7f8fa;
       background-image: radial-gradient(circle, #dcdfe6 1px, transparent 1px);
@@ -163,16 +167,37 @@
       margin: 0 5px;
     }
 
-    /* News */
-    #news-list {
+    /* News + Research Focus share the same bullet rhythm */
+    #news-list,
+    #focus-list {
       padding-left: 20px;
     }
-    #news-list li {
+    #news-list li,
+    #focus-list li {
       margin-bottom: 7px;
       padding-left: 2px;
     }
-    #news-list li::marker {
+    #news-list li::marker,
+    #focus-list li::marker {
       color: #aab1bd;
+    }
+    #focus-list a {
+      color: var(--link);
+      font-weight: 500;
+    }
+    #focus-list a:hover {
+      color: var(--link-hover);
+    }
+    /* Venue sits behind the project name it annotates */
+    .focus-venue {
+      color: var(--text-muted);
+      font-size: 0.9em;
+      white-space: nowrap;
+    }
+
+    /* Jump targets sit on the card rows; keep the card clear of the top edge */
+    #papers-table > tbody > tr {
+      scroll-margin-top: 24px;
     }
 
     /* Section headings get a hairline rule under them */
@@ -236,8 +261,22 @@
           </tr>
         </table>
 
+        <!-- Research -->
+        <h2 class="section-heading" style="margin-top:12px;margin-bottom:20px;">Research</h2>
+        <p style="margin-top:0;margin-bottom:16px;">I specialize in developing principled, controllable and efficient generative models:</p>
+        <!-- target="_self" overrides the page-wide <base target="_blank">, which would
+             otherwise open these in-page jumps in a new tab. -->
+        <ul id="focus-list" style="margin-top:16px;margin-bottom:24px;">
+          <li><b>Pre-training and scaling</b>:
+            <a href="#paper-sigma" target="_self">Sigma</a> <span class="focus-venue">(NVIDIA Tech Report)</span>, <a href="#paper-replaid" target="_self">RePlaid</a> <span class="focus-venue">(NeurIPS 2026)</span>, <a href="#paper-scaling-beyond" target="_self">Scaling Beyond</a> <span class="focus-venue">(ICML 2026)</span></li>
+          <li><b>Transformer architecture design</b>:
+            <a href="#paper-ec-dlm" target="_self">EC-DLM</a> <span class="focus-venue">(COLM 2026)</span>, <a href="#paper-eso-lms" target="_self">Eso-LMs</a> <span class="focus-venue">(ICML 2026)</span>, <a href="#paper-block-diffusion" target="_self">Block Diffusion</a> <span class="focus-venue">(ICLR 2025 Oral)</span></li>
+          <li><b>Classic problems in RL</b>:
+            <a href="#paper-adv-bandits" target="_self">Adversarial Bandits</a> <span class="focus-venue">(EDM 2022)</span>, <a href="#paper-hilmo" target="_self">HILMO</a> <span class="focus-venue">(WAFR 2022)</span>, <a href="#paper-rsac" target="_self">RSAC</a> <span class="focus-venue">(NeurIPS Deep RL Workshop 2021)</span></li>
+        </ul>
+
         <!-- News -->
-        <h2 class="section-heading" style="margin-top:12px;margin-bottom:20px;">News</h2>
+        <h2 class="section-heading" style="margin-top:36px;margin-bottom:20px;">News</h2>
         <ul id="news-list" style="margin-top:16px;margin-bottom:24px;">
           <li><b>2026/11</b>: Invited talk at <b>Hao AI Lab, UCSD</b>: Large Language Continuous Diffusion Models. </li>
           <li><b>2026/11</b>: Invited talk at <b>Gaoling School of AI, Renmin University of China</b>: Large Language Continuous Diffusion Models. </li>
@@ -251,11 +290,10 @@
 
         <!-- Publications -->
         <h2 class="section-heading" style="margin-top:36px;margin-bottom:20px;">Publications</h2>
-        <p style="margin-top:0;margin-bottom:0;">I specialize in developing principled, controllable and efficient generative models for various modalities.</p>
 
         <table id="papers-table" style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;">
 
-          <tr>
+          <tr id="paper-sigma">
             <td style="padding:2.5%;width:25%;vertical-align:middle;min-width:120px">
               <img src="/tn/images/sigma.png" alt="project image" style="width:auto; height:auto; max-width:100%;" />
             </td>
@@ -279,7 +317,7 @@
             </td>
           </tr>
 
-          <tr>
+          <tr id="paper-replaid">
             <td style="padding:2.5%;width:25%;vertical-align:middle;min-width:120px">
               <img src="/tn/images/replaid.png" alt="project image" style="width:auto; height:auto; max-width:100%;" />
             </td>
@@ -303,7 +341,7 @@
             </td>
           </tr>
 
-          <tr>
+          <tr id="paper-ec-dlm">
             <td style="padding:2.5%;width:25%;vertical-align:middle;min-width:120px">
               <img src="/tn/images/ec.png" alt="project image" style="width:auto; height:auto; max-width:100%;" />
             </td>
@@ -324,7 +362,7 @@
             </td>
           </tr>
 
-          <tr>
+          <tr id="paper-scaling-beyond">
             <td style="padding:2.5%;width:25%;vertical-align:middle;min-width:120px">
               <img src="/tn/images/duo_scaling.png" alt="project image" style="width:auto; height:auto; max-width:100%;" />
             </td>
@@ -348,7 +386,7 @@
             </td>
           </tr>
 
-          <tr>
+          <tr id="paper-eso-lms">
             <td style="padding:2.5%;width:25%;vertical-align:middle;min-width:120px">
               <img src="/tn/images/esolm-square.png" alt="project image" style="width:auto; height:auto; max-width:100%;" />
               <div style="text-align:center;margin-top:8px;padding-left:20px;"><iframe src="https://ghbtns.com/github-btn.html?user=s-sahoo&repo=Eso-LMs&type=star&count=true" frameborder="0" scrolling="0" width="100" height="20" title="GitHub stars"></iframe></div>
@@ -373,7 +411,7 @@
             </td>
           </tr>
 
-          <tr>
+          <tr id="paper-block-diffusion">
             <td style="padding:2.5%;width:25%;vertical-align:middle;min-width:120px">
               <img src="/tn/images/bd3lm.png" alt="project image" style="width:auto; height:auto; max-width:100%;" />
               <div style="text-align:center;margin-top:8px;padding-left:20px;"><iframe src="https://ghbtns.com/github-btn.html?user=kuleshov-group&repo=bd3lms&type=star&count=true" frameborder="0" scrolling="0" width="100" height="20" title="GitHub stars"></iframe></div>
@@ -396,7 +434,7 @@
             </td>
           </tr>
 
-          <tr>
+          <tr id="paper-adv-bandits">
             <td style="padding:2.5%;width:25%;vertical-align:middle;min-width:120px">
               <img src="/tn/images/adv-bandits-square.png" alt="project image" style="width:auto; height:auto; max-width:100%;" />
             </td>
@@ -418,7 +456,7 @@
             </td>
           </tr>
 
-          <tr>
+          <tr id="paper-hilmo">
             <td style="padding:2.5%;width:25%;vertical-align:middle;min-width:120px">
               <img src="/tn/images/hrl-mixed-observability-square.png" alt="project image" style="width:auto; height:auto; max-width:100%;" />
             </td>
@@ -439,7 +477,7 @@
             </td>
           </tr>
 
-          <tr>
+          <tr id="paper-rsac">
             <td style="padding:2.5%;width:25%;vertical-align:middle;min-width:120px">
               <img src="/tn/images/robc-square.png" alt="project image" style="width:auto; height:auto; max-width:100%;" />
               <div style="text-align:center;margin-top:8px;padding-left:20px;"><iframe src="https://ghbtns.com/github-btn.html?user=zhihanyang2022&repo=off-policy-continuous-control&type=star&count=true" frameborder="0" scrolling="0" width="100" height="20" title="GitHub stars"></iframe></div>
