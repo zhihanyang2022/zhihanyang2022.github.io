@@ -12,13 +12,47 @@
 /**************/
 /* TOKENS     */
 /**************/
+/* Colours are all routed through these tokens so night mode is a matter of
+   re-pointing them: the dark values live in the [data-theme="dark"] block
+   below, and nothing downstream needs a second rule. */
 :root {
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
                Helvetica, Arial, sans-serif;
   --text: #1f2328;
   --text-muted: #5b6370;
+  --text-soft: #8a919e;
   --link: #1772d0;
   --link-hover: #f09228;
+  --accent: #e67e22;
+  --page-bg: #f7f8fa;
+  --dot: #dcdfe6;
+  --surface: #ffffff;
+  --border: #e3e6eb;
+  --border-strong: #d0d7de;
+  --selection: #cfe3f7;
+  --highlight: #ffffd0;
+}
+
+html[data-theme="dark"],
+html:not([data-theme]) {
+  --text: #e3e6ea;
+  --text-muted: #9aa3b0;
+  --text-soft: #79818e;
+  --link: #6cb0f0;
+  --link-hover: #f5b45e;
+  --accent: #f0a35c;
+  --page-bg: #0f1216;
+  --dot: #20252c;
+  --surface: #171b21;
+  --border: #272d35;
+  --border-strong: #333a44;
+  --selection: #1d3a57;
+  --highlight: #4a4420;
+}
+
+/* Keep the theme swap from flashing white when the toggle is pressed. */
+html[data-theme] body {
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
 /**************/
@@ -118,7 +152,7 @@ h1 {
 }
 
 ::selection {
-  background: #cfe3f7;
+  background: var(--selection);
   color: var(--text);
 }
 
@@ -144,7 +178,7 @@ h1 {
 }
 
 span.highlight {
-  background-color: #ffffd0;
+  background-color: var(--highlight);
 }
 
 // Settled on moving the import of syntax highlighting to the bottom of the CSS

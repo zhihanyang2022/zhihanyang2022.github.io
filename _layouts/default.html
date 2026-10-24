@@ -36,6 +36,31 @@
                            0 12px 28px rgba(16, 24, 40, 0.10);
       --glass-edge: inset 1px 1px 0 rgba(255, 255, 255, 0.75),
                     inset -1px -1px 0 rgba(255, 255, 255, 0.25);
+      --glass-fill: linear-gradient(145deg,
+                                    rgba(255, 255, 255, 0.72),
+                                    rgba(255, 255, 255, 0.42));
+      --rule: linear-gradient(to right, transparent, #d0d7de, transparent);
+      --tooltip-bg: #2b313b;
+      --tooltip-text: #ffffff;
+    }
+
+    /* Night mode. Shadows go darker and heavier (a soft grey shadow is
+       invisible on a dark page), and the glass edge becomes a faint light
+       rim instead of a white one. */
+    html[data-theme="dark"],
+    html:not([data-theme]) {
+      --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.35),
+                     0 4px 14px rgba(0, 0, 0, 0.30);
+      --card-shadow-hover: 0 2px 6px rgba(0, 0, 0, 0.40),
+                           0 14px 32px rgba(0, 0, 0, 0.45);
+      --glass-edge: inset 1px 1px 0 rgba(255, 255, 255, 0.07),
+                    inset -1px -1px 0 rgba(255, 255, 255, 0.03);
+      --glass-fill: linear-gradient(145deg,
+                                    rgba(255, 255, 255, 0.055),
+                                    rgba(255, 255, 255, 0.02));
+      --rule: linear-gradient(to right, transparent, #333a44, transparent);
+      --tooltip-bg: #2c333e;
+      --tooltip-text: #e3e6ea;
     }
 
     html {
@@ -43,9 +68,63 @@
     }
 
     body {
-      background-color: #f7f8fa;
-      background-image: radial-gradient(circle, #dcdfe6 1px, transparent 1px);
+      background-color: var(--page-bg);
+      background-image: radial-gradient(circle, var(--dot) 1px, transparent 1px);
       background-size: 22px 22px;
+    }
+
+    /* Theme toggle: pinned out of the content flow, top-right. */
+    #theme-toggle {
+      position: fixed;
+      top: 14px;
+      right: 14px;
+      z-index: 20;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      background: var(--surface);
+      color: var(--text-muted);
+      box-shadow: var(--card-shadow);
+      cursor: pointer;
+      transition: color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+    }
+    #theme-toggle:hover {
+      color: var(--link-hover);
+      border-color: var(--border-strong);
+      transform: translateY(-1px);
+    }
+    #theme-toggle:focus-visible {
+      outline: 2px solid var(--link);
+      outline-offset: 2px;
+    }
+    #theme-toggle svg {
+      width: 17px;
+      height: 17px;
+      display: block;
+    }
+    /* Only one of the two glyphs is shown: the icon advertises the theme you
+       would switch *to*, so the moon belongs to the light page. */
+    html:not([data-theme="light"]) #theme-toggle .icon-moon,
+    html[data-theme="light"] #theme-toggle .icon-sun {
+      display: none;
+    }
+    @media (max-width: 640px) {
+      #theme-toggle { top: 8px; right: 8px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      #theme-toggle { transition: none; }
+    }
+
+    /* Thumbnails are light-background PNGs; knock them back slightly so they
+       don't glare against the dark cards. */
+    html[data-theme="dark"] #papers-table img,
+    html:not([data-theme]) #papers-table img {
+      filter: brightness(0.88) contrast(1.02);
     }
 
     /* Publication cards.
@@ -60,7 +139,7 @@
       margin-bottom: -24px;
     }
     #papers-table > tbody > tr > td {
-      background: #ffffff;
+      background: var(--surface);
       /* Blank lines inside a card come from <br><br> pairs, and an empty line
          box is sized by the strut (this cell's line-height). 1.65 -> 1.32 is
          a 20% shorter gap. The summary <p> restores 1.65 below. */
@@ -84,9 +163,7 @@
        page's dot pattern diffuses through it. The inset highlight on the top
        and left edges is what sells it as a pane of glass. */
     #papers-table > tbody > tr > td:last-child {
-      background: linear-gradient(145deg,
-                                  rgba(255, 255, 255, 0.72),
-                                  rgba(255, 255, 255, 0.42));
+      background: var(--glass-fill);
       -webkit-backdrop-filter: blur(14px) saturate(165%);
       backdrop-filter: blur(14px) saturate(165%);
       box-shadow: var(--glass-edge), var(--card-shadow);
@@ -94,7 +171,7 @@
     /* Browsers without backdrop-filter fall back to the solid panel */
     @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
       #papers-table > tbody > tr > td:last-child {
-        background: #ffffff;
+        background: var(--surface);
       }
     }
     #papers-table > tbody > tr:hover > td {
@@ -133,7 +210,7 @@
       color: var(--link-hover);
     }
     #papers-table em {
-      color: #39404b;
+      color: var(--text);
       font-style: normal;
       font-weight: 500;
     }
@@ -146,13 +223,13 @@
       border-radius: 6px;
     }
     .me {
-      color: #e67e22;
+      color: var(--accent);
       font-weight: 600;
     }
 
     /* Separator between links (en dash) */
     .sep {
-      color: #c4c9d2;
+      color: var(--border-strong);
       margin: 0 6px;
       -webkit-user-select: none;
       user-select: none;
@@ -179,7 +256,7 @@
     }
     #news-list li::marker,
     #focus-list li::marker {
-      color: #aab1bd;
+      color: var(--text-soft);
     }
     #focus-list a {
       color: var(--link);
@@ -203,8 +280,8 @@
       max-width: 340px;
       padding: 8px 11px;
       border-radius: 8px;
-      background: #2b313b;
-      color: #ffffff;
+      background: var(--tooltip-bg);
+      color: var(--tooltip-text);
       font-size: 13px;
       line-height: 1.45;
       box-shadow: 0 6px 20px rgba(16, 24, 40, 0.22);
@@ -228,13 +305,13 @@
       left: var(--arrow-left, 50%);
       margin-left: -5px;
       border: 5px solid transparent;
-      border-top-color: #2b313b;
+      border-top-color: var(--tooltip-bg);
     }
     #title-tooltip.is-below::after {
       top: auto;
       bottom: 100%;
       border-top-color: transparent;
-      border-bottom-color: #2b313b;
+      border-bottom-color: var(--tooltip-bg);
     }
     @media (prefers-reduced-motion: reduce) {
       #title-tooltip { transition: none; }
@@ -249,7 +326,7 @@
     .section-heading {
       display: block !important;
       padding-bottom: 8px;
-      border-bottom: 1px solid #e3e6eb;
+      border-bottom: 1px solid var(--border);
     }
 
     /* Narrow screens: let the two-column rows stack instead of squeezing */
@@ -274,9 +351,31 @@
       h1 { font-size: 27px; }
     }
   </style>
+
+  <script>
+    // Runs before the body paints, so the dark page never flashes white.
+    // Dark is the default; only a visitor's own past choice overrides it.
+    (function() {
+      var stored = null;
+      try { stored = localStorage.getItem('theme'); } catch (e) {}
+      document.documentElement.setAttribute('data-theme',
+        stored === 'light' ? 'light' : 'dark');
+    })();
+  </script>
 </head>
 
 <body>
+  <button id="theme-toggle" type="button" aria-label="Toggle night mode" title="Toggle night mode">
+    <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+    </svg>
+    <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="4.5"></circle>
+      <path d="M12 1.6v2.2M12 20.2v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M1.6 12h2.2M20.2 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path>
+    </svg>
+  </button>
   <table style="width:100%;max-width:960px;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;">
     <tr style="padding:0px">
       <td style="padding:0px">
@@ -285,11 +384,11 @@
         <table id="intro-table" style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;">
           <tr style="padding:0px">
             <td style="padding:4% 2.5%;width:35%;max-width:35%;vertical-align:middle;text-align:center;">
-              <img style="width:100%;max-width:200px;border-radius:50%;border:3px solid #d0d7de;box-shadow:0 4px 12px rgba(0,0,0,0.1);display:block;margin:0 auto 16px auto;" alt="profile photo" src="images/Yang_Zhihan_Photo.jpg">
+              <img style="width:100%;max-width:200px;border-radius:50%;border:3px solid var(--border-strong);box-shadow:var(--card-shadow);display:block;margin:0 auto 16px auto;" alt="profile photo" src="images/Yang_Zhihan_Photo.jpg">
               <h1 id="name-text" style="margin:0 0 4px 0;">
                 Zhihan Yang
               </h1>
-              <p style="margin:4px 0 14px 0;color:#5b6370;font-size:0.95em;letter-spacing:0.01em;">ML PhD Candidate, Cornell CS</p>
+              <p style="margin:4px 0 14px 0;color:var(--text-muted);font-size:0.95em;letter-spacing:0.01em;">ML PhD Candidate, Cornell CS</p>
               <p id="social-links" style="text-align:center;margin:0;font-weight:500;">
                 <a href="mailto:zhihany@cs.cornell.edu">Email</a><span class="sep">&ndash;</span><a href="https://github.com/zhihanyang2022">GitHub</a><span class="sep">&ndash;</span><a href="https://scholar.google.com/citations?user=WjinQ20AAAAJ&hl=en">Scholar</a><span class="sep">&ndash;</span><a href="https://www.linkedin.com/in/zhihanyang/">LinkedIn</a>
               </p>
@@ -298,7 +397,7 @@
               <p>I'm a 3rd-year PhD candidate at <a href="https://www.cs.cornell.edu/">Cornell CS</a>, where I'm fortunate to be advised by <a href="https://johnthickstun.com/">Prof. John Thickstun</a> on machine learning and generative models.
               </p>
               <p>I'm interning at <a href="https://research.nvidia.com/labs/genair/">NVIDIA Fundamental GenAI Research</a>. I interned at <a href="https://ifm.ai/">MBZUAI Institute of Foundation Models</a> working with <a href="https://hunterhector.github.io/">Hector Liu</a> and <a href="https://s-sahoo.com/">Subham Sahoo</a> (Summer 2024).</p>
-              <hr style="border:none;height:1px;background:linear-gradient(to right, transparent, #d0d7de, transparent);margin:10px 0;">
+              <hr style="border:none;height:1px;background:var(--rule);margin:10px 0;">
               <p>I have a <b>BA in Mathematics</b> and a <b>BA in Statistics</b> from <a href="https://www.carleton.edu/math/">Carleton College</a>. During those years, I was fortunate to work with <a href="http://www.sethcooper.net/">Seth Cooper</a> on generative models, <a href="https://sites.google.com/site/annanrafferty/">Anna Rafferty</a> on bandits, <a href="https://www.khoury.northeastern.edu/home/camato/">Christopher Amato</a> on deep RL, and <a href="https://aloy.rbind.io/">Adam Loy</a> and <a href="https://www.clairekelling.com/">Claire Kelling</a> on MCMC algorithms and Gaussian Processes.
               </p>
               <p>I received the <a href="https://cra.org/about/awards/outstanding-undergraduate-researcher-award/#2023">CRA Outstanding Undergraduate Researcher Award</a>.</p>
@@ -593,10 +692,10 @@
           <tr>
             <td style="padding:0px">
               <br>
-              <p style="text-align:center;font-size:small;color:#8a919e;">
+              <p style="text-align:center;font-size:small;color:var(--text-soft);">
                 Design and source code modified from <a style="font-size:small;" href="https://jonbarron.info">Jon Barron's website</a>
               </p>
-              <p style="text-align:center;font-size:small;color:#8a919e;">
+              <p style="text-align:center;font-size:small;color:var(--text-soft);">
                 &copy; All rights reserved by Zhihan Yang
               </p>
             </td>
@@ -608,6 +707,21 @@
   </table>
 
   <script>
+    // Night-mode toggle. The initial theme is already set by the inline script
+    // in <head>; this only handles flipping and remembering it.
+    (function() {
+      var btn = document.getElementById('theme-toggle');
+      if (!btn) return;
+      var root = document.documentElement;
+
+      btn.addEventListener('click', function() {
+        var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        root.setAttribute('data-theme', next);
+        try { localStorage.setItem('theme', next); } catch (e) {}
+      });
+
+    })();
+
     // Research-section hover bubbles: each link's title is read off the paper
     // card it points at, so the two can't drift apart.
     document.addEventListener('DOMContentLoaded', function() {
