@@ -195,6 +195,51 @@
       white-space: nowrap;
     }
 
+    /* Hover bubble showing a paper's full title. One shared element, moved and
+       positioned by script so it can never be clipped by the viewport edge. */
+    #title-tooltip {
+      position: absolute;
+      z-index: 10;
+      max-width: 340px;
+      padding: 8px 11px;
+      border-radius: 8px;
+      background: #2b313b;
+      color: #ffffff;
+      font-size: 13px;
+      line-height: 1.45;
+      box-shadow: 0 6px 20px rgba(16, 24, 40, 0.22);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(3px);
+      transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s;
+      pointer-events: none;
+    }
+    #title-tooltip.is-visible {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+    /* Arrow; its horizontal offset is set inline so it keeps pointing at the
+       link even when the bubble is nudged inward to stay on screen. */
+    #title-tooltip::after {
+      content: "";
+      position: absolute;
+      top: 100%;
+      left: var(--arrow-left, 50%);
+      margin-left: -5px;
+      border: 5px solid transparent;
+      border-top-color: #2b313b;
+    }
+    #title-tooltip.is-below::after {
+      top: auto;
+      bottom: 100%;
+      border-top-color: transparent;
+      border-bottom-color: #2b313b;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      #title-tooltip { transition: none; }
+    }
+
     /* Jump targets sit on the card rows; keep the card clear of the top edge */
     #papers-table > tbody > tr {
       scroll-margin-top: 24px;
@@ -254,7 +299,7 @@
               </p>
               <p>I'm interning at <a href="https://research.nvidia.com/labs/genair/">NVIDIA Fundamental GenAI Research</a>. I interned at <a href="https://ifm.ai/">MBZUAI Institute of Foundation Models</a> working with <a href="https://hunterhector.github.io/">Hector Liu</a> and <a href="https://s-sahoo.com/">Subham Sahoo</a> (Summer 2024).</p>
               <hr style="border:none;height:1px;background:linear-gradient(to right, transparent, #d0d7de, transparent);margin:10px 0;">
-              <p>I have a <b>BA in Mathematics</b> and a <b>BA in Statistics</b> from <a href="https://www.carleton.edu/math/">Carleton College</a>. During those years, I was fortunate to work with <a href="http://www.sethcooper.net/">Seth Cooper</a> on generative models, <a href="https://sites.google.com/site/annanrafferty/">Anna Rafferty</a> on bandits, <a href="https://www.khoury.northeastern.edu/home/camato/">Christopher Amato</a> on deep RL, and <a href="https://aloy.rbind.io/">Adam Loy</a> and <a href="https://www.clairekelling.com/">Claire Kelling</a> on MCMC algorithms and Gaussian Processes.
+              <p>Previously, I earned a <b>BA in Mathematics</b> and a <b>BA in Statistics</b> from <a href="https://www.carleton.edu/math/">Carleton College</a>. During those years, I was fortunate to work with <a href="http://www.sethcooper.net/">Seth Cooper</a> on generative models, <a href="https://sites.google.com/site/annanrafferty/">Anna Rafferty</a> on bandits, <a href="https://www.khoury.northeastern.edu/home/camato/">Christopher Amato</a> on deep RL, and <a href="https://aloy.rbind.io/">Adam Loy</a> and <a href="https://www.clairekelling.com/">Claire Kelling</a> on MCMC algorithms and Gaussian Processes.
               </p>
               <p>I received the <a href="https://cra.org/about/awards/outstanding-undergraduate-researcher-award/#2023">CRA Outstanding Undergraduate Researcher Award</a>.</p>
             </td>
@@ -563,6 +608,74 @@
   </table>
 
   <script>
+    // Research-section hover bubbles: each link's title is read off the paper
+    // card it points at, so the two can't drift apart.
+    document.addEventListener('DOMContentLoaded', function() {
+      var links = document.querySelectorAll('#focus-list a[href^="#paper-"]');
+      if (!links.length) return;
+
+      var tip = document.createElement('div');
+      tip.id = 'title-tooltip';
+      tip.setAttribute('role', 'tooltip');
+      document.body.appendChild(tip);
+
+      var hideTimer = null;
+
+      function show(link) {
+        var row = document.querySelector(link.getAttribute('href'));
+        var heading = row && row.querySelector('h3');
+        if (!heading) return;
+
+        clearTimeout(hideTimer);
+        tip.textContent = heading.textContent.trim();
+        tip.classList.add('is-visible');
+
+        var rect = link.getBoundingClientRect();
+        var scrollX = window.pageXOffset;
+        var scrollY = window.pageYOffset;
+        var margin = 8;
+        // Measure from a known corner: the bubble's wrap width depends on where
+        // it sits, so leaving it at its previous spot skews the measurement.
+        tip.style.left = '0px';
+        tip.style.top = '0px';
+        var tipRect = tip.getBoundingClientRect();
+
+        // Centre on the link, then pull back inside the viewport if needed.
+        var linkCentre = rect.left + rect.width / 2;
+        var left = linkCentre - tipRect.width / 2;
+        var maxLeft = document.documentElement.clientWidth - tipRect.width - margin;
+        left = Math.max(margin, Math.min(left, maxLeft));
+
+        // Prefer above the link; flip below when there isn't room.
+        var below = rect.top - tipRect.height - 10 < margin;
+        var top = below ? rect.bottom + 10 : rect.top - tipRect.height - 10;
+        tip.classList.toggle('is-below', below);
+
+        tip.style.left = (left + scrollX) + 'px';
+        tip.style.top = (top + scrollY) + 'px';
+        tip.style.setProperty('--arrow-left', (linkCentre - left) + 'px');
+      }
+
+      function hide() {
+        hideTimer = setTimeout(function() {
+          tip.classList.remove('is-visible');
+        }, 60);
+      }
+
+      Array.prototype.forEach.call(links, function(link) {
+        link.addEventListener('mouseenter', function() { show(link); });
+        link.addEventListener('focus', function() { show(link); });
+        link.addEventListener('mouseleave', hide);
+        link.addEventListener('blur', hide);
+      });
+
+      // A scroll (including the smooth jump a click starts) invalidates the
+      // position, so drop the bubble rather than let it float off-target.
+      window.addEventListener('scroll', function() {
+        tip.classList.remove('is-visible');
+      }, { passive: true });
+    });
+
     document.addEventListener('DOMContentLoaded', function() {
       var el = document.getElementById('name-text');
       if (!el) return;
